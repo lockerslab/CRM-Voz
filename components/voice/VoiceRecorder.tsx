@@ -149,8 +149,12 @@ export function VoiceRecorder({
       });
       const processJson = (await processRes.json()) as ProcessNoteResponse & {
         error?: string;
+        code?: string;
       };
       if (!processRes.ok) {
+        if (processJson.code === "empty_note") {
+          await supabase.storage.from("audio").remove([path]);
+        }
         throw new Error(processJson.error ?? "Falló el procesamiento");
       }
 

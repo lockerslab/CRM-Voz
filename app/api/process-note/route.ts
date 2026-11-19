@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   ExtractionValidationError,
   extractNoteData,
+  isProposalEmpty,
 } from "@/lib/ai/extractData";
 import { createClient } from "@/lib/supabase/server";
 import type { ProcessNoteResponse } from "@/types";
@@ -78,6 +79,19 @@ export async function POST(request: Request) {
         company: (c.company as string | null) ?? null,
       })),
     });
+
+    // Con la clave de Groq configurada (no stub), una propuesta totalmente vacía
+    // casi seguro viene de audio sin contenido real: no abrimos una pantalla vacía.
+    if (!stub && isProposalEmpty(proposal)) {
+      return NextResponse.json(
+        {
+          error:
+            "No encontré datos de una nota de ventas 🤔 Probá de nuevo contando con quién hablaste y qué sigue.",
+          code: "empty_note",
+        },
+        { status: 422 },
+      );
+    }
 
     const response: ProcessNoteResponse = {
       proposal,

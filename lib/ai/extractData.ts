@@ -177,6 +177,25 @@ export class ExtractionValidationError extends Error {
   }
 }
 
+/**
+ * True si la IA no pudo sacar NADA útil de la nota (ni contacto, ni tarea, ni
+ * datos, ni resumen). Abrir la pantalla de revisión vacía confunde al vendedor.
+ */
+export function isProposalEmpty(p: NoteProposal): boolean {
+  const has = (v: string | null) => Boolean(v && v.trim());
+  return !(
+    has(p.contact_name) ||
+    p.contact_id ||
+    has(p.task_title) ||
+    has(p.company) ||
+    has(p.email) ||
+    has(p.phone) ||
+    has(p.product_interest) ||
+    has(p.summary) ||
+    p.channels.length > 0
+  );
+}
+
 /** Whether a task should be created from a proposal. */
 export function shouldCreateTask(proposal: NoteProposal): boolean {
   return Boolean(proposal.task_title || proposal.due_at);

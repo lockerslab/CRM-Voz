@@ -244,6 +244,10 @@ export function NoteReviewSheet({
             {mode === "update" ? (
               <Select
                 value={contactId || undefined}
+                items={sortedContacts.map((c) => ({
+                  value: c.id,
+                  label: c.company ? `${c.name} · ${c.company}` : c.name,
+                }))}
                 onValueChange={(v) => onSelectExisting(v ?? null)}
               >
                 <SelectTrigger className="w-full">
@@ -275,6 +279,10 @@ export function NoteReviewSheet({
             <Label>Etapa</Label>
             <Select
               value={stage}
+              items={PIPELINE_STAGES.map((s) => ({
+                value: s,
+                label: PIPELINE_STAGE_LABELS[s],
+              }))}
               onValueChange={(v) => {
                 if (v && (PIPELINE_STAGES as readonly string[]).includes(v)) {
                   setStage(v as PipelineStage);
