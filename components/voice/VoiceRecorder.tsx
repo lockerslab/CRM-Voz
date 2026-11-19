@@ -39,6 +39,12 @@ function formatCountdown(total: number, elapsed: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+function formatElapsed(elapsed: number): string {
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 export function VoiceRecorder({
   contacts = [],
   floating = false,
@@ -213,24 +219,25 @@ export function VoiceRecorder({
   }
 
   const countdown = formatCountdown(MAX_SECONDS, elapsed);
+  const elapsedLabel = formatElapsed(elapsed);
 
   if (floating) {
     return (
       <>
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(1rem,env(safe-area-inset-bottom))] md:hidden">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(1.25rem,env(safe-area-inset-bottom))] md:hidden">
           <div className="pointer-events-auto flex flex-col items-center gap-2">
             {recording ? (
-              <p className="rounded-full bg-background/90 px-3 py-1 text-sm font-medium shadow ring-1 ring-border">
-                {countdown}
+              <p className="rounded-full bg-white/95 px-3.5 py-1 text-sm font-semibold tabular-nums text-violet-700 shadow-md ring-1 ring-violet-100">
+                {elapsedLabel}
               </p>
             ) : null}
             {busy && status ? (
-              <p className="rounded-full bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow ring-1 ring-border">
+              <p className="rounded-full bg-white/95 px-3 py-1 text-xs text-slate-500 shadow-md ring-1 ring-slate-100">
                 {status}
               </p>
             ) : null}
             {error ? (
-              <p className="max-w-xs rounded-lg bg-destructive/10 px-3 py-1 text-center text-xs text-destructive">
+              <p className="max-w-xs rounded-xl bg-red-50 px-3 py-1.5 text-center text-xs text-red-600 shadow-sm">
                 {error}
               </p>
             ) : null}
@@ -238,15 +245,21 @@ export function VoiceRecorder({
               type="button"
               size="lg"
               disabled={busy}
-              variant={recording ? "destructive" : "default"}
-              className="h-16 w-16 rounded-full shadow-lg"
+              variant="default"
+              className={`size-[72px] rounded-full bg-[#6D28D9] text-white shadow-lg shadow-violet-300/50 transition-all duration-200 hover:bg-[#5b21b6] hover:shadow-xl ${
+                recording ? "animate-record-pulse bg-red-500 hover:bg-red-600" : ""
+              }`}
               onClick={() => {
                 if (recording) stopRecording();
                 else void startRecording();
               }}
               aria-label={recording ? "Detener grabación" : "Grabar nota de voz"}
             >
-              {recording ? <Square className="size-6" /> : <Mic className="size-7" />}
+              {recording ? (
+                <Square className="size-6 fill-current" />
+              ) : (
+                <Mic className="size-7" />
+              )}
             </Button>
           </div>
         </div>
@@ -264,24 +277,31 @@ export function VoiceRecorder({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border p-4">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200">
+      <div className="flex flex-wrap items-center gap-3">
         {!recording ? (
           <Button
             type="button"
             disabled={busy}
+            className="rounded-full bg-[#6D28D9] px-5 transition-all duration-200 hover:bg-[#5b21b6]"
             onClick={() => void startRecording()}
           >
             <Mic className="size-4" />
             Grabar
           </Button>
         ) : (
-          <Button type="button" variant="destructive" onClick={stopRecording}>
-            <Square className="size-4" />
-            Detener · {countdown}
+          <Button
+            type="button"
+            variant="destructive"
+            className="animate-record-pulse rounded-full transition-all duration-200"
+            onClick={stopRecording}
+          >
+            <Square className="size-4 fill-current" />
+            Detener · {elapsedLabel}
+            <span className="opacity-70">({countdown})</span>
           </Button>
         )}
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-slate-500">
           {busy
             ? status ?? "Procesando…"
             : recording
@@ -290,7 +310,7 @@ export function VoiceRecorder({
         </span>
       </div>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
       <NoteReviewSheet
         open={sheetOpen}

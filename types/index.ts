@@ -18,6 +18,43 @@ export const PIPELINE_STAGE_LABELS: Record<PipelineStage, string> = {
   lost: "Perdido",
 };
 
+/** Visual tokens for stage chips / column borders (presentation only). */
+export const PIPELINE_STAGE_COLORS: Record<
+  PipelineStage,
+  { chip: string; border: string; soft: string }
+> = {
+  cold_lead: {
+    chip: "bg-slate-100 text-slate-700",
+    border: "border-slate-300",
+    soft: "bg-slate-50/80",
+  },
+  contacted: {
+    chip: "bg-sky-100 text-sky-800",
+    border: "border-sky-300",
+    soft: "bg-sky-50/70",
+  },
+  meeting: {
+    chip: "bg-amber-100 text-amber-900",
+    border: "border-amber-300",
+    soft: "bg-amber-50/70",
+  },
+  negotiation: {
+    chip: "bg-violet-100 text-violet-800",
+    border: "border-violet-300",
+    soft: "bg-violet-50/70",
+  },
+  won: {
+    chip: "bg-emerald-100 text-emerald-800",
+    border: "border-emerald-400",
+    soft: "bg-emerald-50/70",
+  },
+  lost: {
+    chip: "bg-red-50 text-red-600",
+    border: "border-red-200",
+    soft: "bg-red-50/60",
+  },
+};
+
 export type Profile = {
   id: string;
   full_name: string | null;

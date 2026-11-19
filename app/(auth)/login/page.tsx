@@ -46,10 +46,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>crm-voz</CardTitle>
+    <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
+      <Card className="w-full max-w-md rounded-2xl border-slate-200 bg-white shadow-sm transition-all duration-200">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            crm-voz
+          </CardTitle>
           <CardDescription>Entrá con tu email y contraseña</CardDescription>
         </CardHeader>
         <form onSubmit={(e) => void onSubmit(e)}>
@@ -61,6 +63,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
+                className="h-10 rounded-xl transition-all duration-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -72,19 +75,27 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
+                className="h-10 rounded-xl transition-all duration-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
           </CardContent>
-          <CardFooter className="flex flex-col items-stretch gap-3">
-            <Button type="submit" disabled={loading}>
+          <CardFooter className="flex flex-col items-stretch gap-3 bg-transparent">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="h-11 rounded-xl bg-[#6D28D9] transition-all duration-200 hover:bg-[#5b21b6]"
+            >
               {loading ? "Entrando…" : "Entrar"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-slate-500">
               ¿No tenés cuenta?{" "}
-              <Link href="/register" className="underline underline-offset-4">
+              <Link
+                href="/register"
+                className="font-medium text-violet-700 underline-offset-4 transition-all duration-200 hover:underline"
+              >
                 Registrate
               </Link>
             </p>

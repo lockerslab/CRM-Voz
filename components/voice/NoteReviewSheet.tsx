@@ -195,10 +195,10 @@ export function NoteReviewSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[92vh] overflow-y-auto rounded-t-2xl sm:mx-auto sm:max-w-lg"
+        className="max-h-[92vh] overflow-y-auto rounded-t-2xl border-slate-200 bg-white sm:mx-auto sm:max-w-lg"
       >
         <SheetHeader>
-          <SheetTitle>Revisar nota de voz</SheetTitle>
+          <SheetTitle className="text-lg font-bold">Revisar nota de voz</SheetTitle>
           <SheetDescription>
             Confirmá o editá los datos antes de guardar en el CRM.
           </SheetDescription>
@@ -361,7 +361,12 @@ export function NoteReviewSheet({
           >
             Cancelar
           </Button>
-          <Button type="button" onClick={() => void handleConfirm()} disabled={!canSave}>
+          <Button
+            type="button"
+            className="rounded-xl bg-[#6D28D9] transition-all duration-200 hover:bg-[#5b21b6]"
+            onClick={() => void handleConfirm()}
+            disabled={!canSave}
+          >
             {saving ? "Guardando…" : "Confirmar y guardar"}
           </Button>
         </SheetFooter>
