@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatDue } from "@/lib/dates";
 import type { Task } from "@/types";
 import { CheckCircle2, ClipboardList } from "lucide-react";
 
@@ -36,7 +37,7 @@ export function TaskList({ tasks, onToggleComplete }: TaskListProps) {
             <div className="flex flex-wrap gap-1">
               {task.due_date ? (
                 <Badge variant="secondary" className="text-[10px]">
-                  Vence {new Date(task.due_date).toLocaleString("es-AR")}
+                  Vence {formatDue(task.due_date)}
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-[10px]">

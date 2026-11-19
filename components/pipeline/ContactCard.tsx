@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatDue } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
 import type { Contact, PipelineStage, Task } from "@/types";
 import {
@@ -70,12 +71,7 @@ export function ContactCard({
               <span className="font-medium text-slate-700">{nextTask.title}</span>
               {nextTask.due_date ? (
                 <span className="block text-slate-400">
-                  {new Date(nextTask.due_date).toLocaleString("es-AR", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatDue(nextTask.due_date)}
                 </span>
               ) : null}
             </span>

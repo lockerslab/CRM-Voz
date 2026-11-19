@@ -180,3 +180,52 @@ export function resolveDue(
 
   return iso;
 }
+
+// ---------------------------------------------------------------------------
+// Mostrar fechas: SIEMPRE con zona horaria explícita y reloj de 24 hs.
+// (toLocaleString() a secas usa la zona del servidor —UTC en Netlify— y el
+//  formato por defecto de es-AR omite el "p. m.": 16:00 se ve como "04:00:00".)
+// ---------------------------------------------------------------------------
+
+function fmt(
+  iso: string | Date | null | undefined,
+  timeZone: string,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  if (!iso) return "";
+  const date = typeof iso === "string" ? new Date(iso) : iso;
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-AR", {
+    timeZone,
+    hourCycle: "h23",
+    ...options,
+  }).format(date);
+}
+
+/** Vencimiento de tarea: "jue 26 nov, 16:00" */
+export function formatDue(
+  iso: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIMEZONE,
+): string {
+  return fmt(iso, timeZone, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).replace(/\./g, "").replace(",", "");
+}
+
+/** Momento en que pasó algo: "19/11/2026, 18:50" */
+export function formatStamp(
+  iso: string | Date | null | undefined,
+  timeZone: string = DEFAULT_TIMEZONE,
+): string {
+  return fmt(iso, timeZone, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}

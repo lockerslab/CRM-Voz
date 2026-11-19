@@ -3,6 +3,7 @@ import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatStamp } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { Contact, Interaction, Task } from "@/types";
 import { PIPELINE_STAGE_COLORS, PIPELINE_STAGE_LABELS } from "@/types";
@@ -137,7 +138,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <div className="mb-1 flex items-center justify-between gap-2">
                 <Badge variant="outline">{item.type}</Badge>
                 <time className="text-xs text-slate-400">
-                  {new Date(item.created_at).toLocaleString("es-AR")}
+                  {formatStamp(item.created_at)}
                 </time>
               </div>
               {item.extracted_json?.summary ? (

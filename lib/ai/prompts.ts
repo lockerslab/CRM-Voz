@@ -89,7 +89,7 @@ Reglas:
 - channels: canales mencionados (whatsapp, email, teléfono, linkedin, etc.).
 - product_interest: producto o servicio de interés si se menciona.
 - stage: mapeá lenguaje de pipeline (ej. "cerramos" → won, "perdido" → lost, "lead frío" → cold_lead).
-- summary: 1–2 oraciones en español rioplatense.
+- summary: 1–2 oraciones en español rioplatense. NO incluyas fechas, días ni horas en el resumen (ya van en la tarea): contá qué pasó y qué necesita el contacto. Ejemplo correcto: "Tiene una prepaga y quiere cotizar un plan para toda la familia." Ejemplo incorrecto: "Hay que llamarla el jueves a las 16:00."
 - missing: lista de campos importantes que faltan (contact_name, email, phone, due_at, etc.).`;
 }
 
