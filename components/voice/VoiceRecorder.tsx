@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import type { Contact, NoteProposal, ProcessNoteResponse, TranscribeResponse } from "@/types";
 import { Mic, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { DEFAULT_TIMEZONE } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
 
 const MAX_SECONDS = 180;
@@ -66,6 +67,7 @@ export function VoiceRecorder({
   const [proposal, setProposal] = useState<NoteProposal | null>(null);
   const [transcript, setTranscript] = useState("");
   const [audioPath, setAudioPath] = useState("");
+  const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE);
 
   const cleanupStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -126,8 +128,13 @@ export function VoiceRecorder({
       });
       const transcribeJson = (await transcribeRes.json()) as TranscribeResponse & {
         error?: string;
+        code?: string;
       };
       if (!transcribeRes.ok) {
+        if (transcribeJson.code === "no_speech") {
+          // Audio sin voz: no lo dejamos ocupando lugar en Storage.
+          await supabase.storage.from("audio").remove([path]);
+        }
         throw new Error(transcribeJson.error ?? "Falló la transcripción");
       }
 
@@ -149,6 +156,7 @@ export function VoiceRecorder({
 
       setAudioPath(path);
       setTranscript(transcribeJson.transcript);
+      setTimezone(processJson.timezone ?? DEFAULT_TIMEZONE);
       setProposal(processJson.proposal);
       setSheetOpen(true);
       setStatus(null);
@@ -182,6 +190,11 @@ export function VoiceRecorder({
       };
       recorder.onstop = () => {
         clearTimer();
+        if (elapsedRef.current < 1) {
+          cleanupStream();
+          setError("Fue muy cortito 🙂 Mantené apretado y contame la nota completa.");
+          return;
+        }
         const blob = new Blob(chunksRef.current, {
           type: recorder.mimeType || mimeType || "audio/webm",
         });
@@ -270,6 +283,7 @@ export function VoiceRecorder({
           transcript={transcript}
           audioPath={audioPath}
           contacts={contacts}
+          timezone={timezone}
           onSaved={() => onSaved?.()}
         />
       </>
@@ -319,6 +333,7 @@ export function VoiceRecorder({
         transcript={transcript}
         audioPath={audioPath}
         contacts={contacts}
+        timezone={timezone}
         onSaved={() => onSaved?.()}
       />
     </div>

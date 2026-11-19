@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import type { TranscribeResponse } from "@/types";
+import { NO_SPEECH_MESSAGE, checkTranscript } from "@/lib/ai/transcript";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -101,8 +102,17 @@ export async function POST(request: Request) {
       response_format: "json",
     });
 
+    const check = checkTranscript(transcription.text);
+    if (!check.ok) {
+      // Silencio / ruido / "frase fantasma" de Whisper: no seguimos al paso de extracción.
+      return NextResponse.json(
+        { error: NO_SPEECH_MESSAGE, code: "no_speech" },
+        { status: 422 },
+      );
+    }
+
     const response: TranscribeResponse = {
-      transcript: transcription.text ?? "",
+      transcript: check.text,
       audioPath,
       stub: false,
     };

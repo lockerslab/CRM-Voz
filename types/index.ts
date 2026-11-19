@@ -136,6 +136,8 @@ export type ProcessNoteResponse = {
   proposal: NoteProposal;
   audioPath: string;
   transcript: string;
+  /** Zona horaria del perfil del usuario (IANA), para armar fechas con offset. */
+  timezone: string;
   stub?: boolean;
 };
 

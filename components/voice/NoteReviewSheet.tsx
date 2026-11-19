@@ -19,6 +19,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { DEFAULT_TIMEZONE, zonedTimeToIso } from "@/lib/dates";
 import type { Contact, NoteProposal, PipelineStage, SaveNotePayload } from "@/types";
 import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from "@/types";
 import { useEffect, useMemo, useState } from "react";
@@ -30,6 +31,8 @@ type NoteReviewSheetProps = {
   transcript: string;
   audioPath: string;
   contacts: Contact[];
+  /** Zona horaria del usuario (IANA). Por defecto, Buenos Aires. */
+  timezone?: string;
   onSaved?: (result: { contact_id: string }) => void;
 };
 
@@ -43,11 +46,20 @@ function splitDueAt(dueAt: string | null): { date: string; time: string } {
   return { date: match[1]!, time: match[2]! };
 }
 
-function joinDueAt(date: string, time: string): string | null {
+function joinDueAt(date: string, time: string, timezone: string): string | null {
   if (!date) return null;
-  const hhmm = time || "09:00";
-  // Argentina default offset for user-edited values without TZ picker
-  return `${date}T${hhmm}:00-03:00`;
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+  const timeMatch = /^(\d{2}):(\d{2})$/.exec(time || "09:00");
+  if (!dateMatch || !timeMatch) return null;
+  // Offset real de la zona del usuario (no más -03:00 fijo).
+  return zonedTimeToIso(
+    Number(dateMatch[1]),
+    Number(dateMatch[2]),
+    Number(dateMatch[3]),
+    Number(timeMatch[1]),
+    Number(timeMatch[2]),
+    timezone,
+  );
 }
 
 export function NoteReviewSheet({
@@ -57,6 +69,7 @@ export function NoteReviewSheet({
   transcript,
   audioPath,
   contacts,
+  timezone = DEFAULT_TIMEZONE,
   onSaved,
 }: NoteReviewSheetProps) {
   const [mode, setMode] = useState<"create" | "update">("create");
@@ -164,7 +177,7 @@ export function NoteReviewSheet({
       transcript,
       audioPath,
       task_title: taskTitle.trim() || null,
-      due_at: taskTitle.trim() ? joinDueAt(dueDate, dueTime) : null,
+      due_at: taskTitle.trim() ? joinDueAt(dueDate, dueTime, timezone) : null,
     };
 
     try {

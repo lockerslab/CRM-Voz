@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { z } from "zod";
+import { buildCalendarTable, resolveDue } from "@/lib/dates";
 import type { NoteProposal, PipelineStage } from "@/types";
 import { PIPELINE_STAGES } from "@/types";
 import {
@@ -14,7 +15,22 @@ const stageSchema = z.enum(
   PIPELINE_STAGES as unknown as [PipelineStage, ...PipelineStage[]],
 );
 
-export const noteProposalSchema = z.object({
+/** Lo que devuelve el modelo: la fecha viene como "elección", no como ISO. */
+const dueSpecSchema = z
+  .object({
+    days_from_today: z.number().int().min(0).max(366).nullable().catch(null),
+    day: z.number().int().min(1).max(31).nullable().catch(null),
+    month: z.number().int().min(1).max(12).nullable().catch(null),
+    time: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+      .nullable()
+      .catch(null),
+  })
+  .nullable()
+  .catch(null);
+
+const llmNoteSchema = z.object({
   action: z.enum(["create", "update"]),
   contact_id: z.string().uuid().nullable().catch(null),
   contact_name: z.string().nullable().catch(null),
@@ -26,13 +42,15 @@ export const noteProposalSchema = z.object({
   product_interest: z.string().nullable().catch(null),
   summary: z.string().nullable().catch(null),
   task_title: z.string().nullable().catch(null),
-  due_at: z.string().nullable().catch(null),
+  due: dueSpecSchema,
   missing: z.array(z.string()).catch([]),
 });
 
 export type ExtractContext = {
   timezone: string;
   contacts: ContactBrief[];
+  /** Solo para tests: reloj fijo. */
+  now?: Date;
 };
 
 function stubExtract(transcript: string): NoteProposal {
@@ -50,9 +68,44 @@ function stubExtract(transcript: string): NoteProposal {
   };
 }
 
-function parseProposal(content: string): NoteProposal {
-  const parsed = JSON.parse(content) as unknown;
-  return noteProposalSchema.parse(parsed);
+/**
+ * Valida el JSON del modelo y arma la propuesta final.
+ * La fecha (due_at) la calcula el código a partir de la elección del modelo.
+ */
+export function parseProposal(
+  content: string,
+  context: ExtractContext,
+): NoteProposal {
+  const llm = llmNoteSchema.parse(JSON.parse(content) as unknown);
+  const now = context.now ?? new Date();
+
+  const dueAt = resolveDue(llm.due, now, context.timezone);
+
+  // Si el modelo inventó un contact_id que no es del usuario, lo descartamos.
+  const knownContact =
+    llm.contact_id != null &&
+    context.contacts.some((c) => c.id === llm.contact_id);
+  const action = llm.action === "update" && knownContact ? "update" : "create";
+
+  const missing = new Set(llm.missing);
+  if (llm.task_title && !dueAt) missing.add("due_at");
+  if (dueAt) missing.delete("due_at");
+
+  return {
+    action,
+    contact_id: action === "update" ? llm.contact_id : null,
+    contact_name: llm.contact_name,
+    company: llm.company,
+    email: llm.email,
+    phone: llm.phone,
+    stage: llm.stage,
+    channels: llm.channels,
+    product_interest: llm.product_interest,
+    summary: llm.summary,
+    task_title: llm.task_title,
+    due_at: dueAt,
+    missing: [...missing],
+  };
 }
 
 export type ExtractResult = {
@@ -71,11 +124,12 @@ export async function extractNoteData(
   }
 
   const groq = new Groq({ apiKey });
-  const nowLabel = formatNowInTimezone(context.timezone);
+  const now = context.now ?? new Date();
   const system = buildNoteExtractionSystemPrompt({
     timezone: context.timezone,
-    nowLabel,
+    nowLabel: formatNowInTimezone(context.timezone, now),
     contacts: context.contacts,
+    calendar: buildCalendarTable(now, context.timezone),
   });
   const user = buildNoteExtractionUserPrompt(transcript);
 
@@ -91,7 +145,7 @@ export async function extractNoteData(
     });
 
     const content = completion.choices[0]?.message?.content ?? "{}";
-    return parseProposal(content);
+    return parseProposal(content, context);
   }
 
   try {
