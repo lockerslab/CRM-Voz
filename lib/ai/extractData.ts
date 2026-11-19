@@ -1,100 +1,133 @@
 import Groq from "groq-sdk";
-import type { ExtractedNote, PipelineStage } from "@/types";
+import { z } from "zod";
+import type { NoteProposal, PipelineStage } from "@/types";
+import { PIPELINE_STAGES } from "@/types";
 import {
-  EMPTY_EXTRACTED_NOTE,
-  NOTE_EXTRACTION_SYSTEM_PROMPT,
+  EMPTY_NOTE_PROPOSAL,
+  buildNoteExtractionSystemPrompt,
   buildNoteExtractionUserPrompt,
+  formatNowInTimezone,
+  type ContactBrief,
 } from "./prompts";
 
-const VALID_STAGES = new Set<PipelineStage>([
-  "cold_lead",
-  "contacted",
-  "meeting",
-  "negotiation",
-  "won",
-  "lost",
-]);
+const stageSchema = z.enum(
+  PIPELINE_STAGES as unknown as [PipelineStage, ...PipelineStage[]],
+);
 
-function normalizeExtracted(raw: Partial<ExtractedNote> | null | undefined): ExtractedNote {
-  const stage =
-    raw?.stage && VALID_STAGES.has(raw.stage as PipelineStage)
-      ? (raw.stage as PipelineStage)
-      : null;
+export const noteProposalSchema = z.object({
+  action: z.enum(["create", "update"]),
+  contact_id: z.string().uuid().nullable().catch(null),
+  contact_name: z.string().nullable().catch(null),
+  company: z.string().nullable().catch(null),
+  email: z.string().nullable().catch(null),
+  phone: z.string().nullable().catch(null),
+  stage: stageSchema.nullable().catch(null),
+  channels: z.array(z.string()).catch([]),
+  product_interest: z.string().nullable().catch(null),
+  summary: z.string().nullable().catch(null),
+  task_title: z.string().nullable().catch(null),
+  due_at: z.string().nullable().catch(null),
+  missing: z.array(z.string()).catch([]),
+});
+
+export type ExtractContext = {
+  timezone: string;
+  contacts: ContactBrief[];
+};
+
+function stubExtract(transcript: string): NoteProposal {
+  const mentionsFollowUp =
+    /\b(follow[\s-]?up|llamar|llamá|reunión|reunion|meeting|mañana|tomorrow|próxima|proxima|seguimiento)\b/i.test(
+      transcript,
+    );
 
   return {
-    contact_name: raw?.contact_name ?? null,
-    company: raw?.company ?? null,
-    email: raw?.email ?? null,
-    phone: raw?.phone ?? null,
-    stage,
-    summary: raw?.summary ?? null,
-    task_title: raw?.task_title ?? null,
-    due_date: raw?.due_date ?? null,
-    due_time: raw?.due_time ?? null,
-    needs_datetime: Boolean(raw?.needs_datetime),
-    raw_mentions: Array.isArray(raw?.raw_mentions) ? raw.raw_mentions.map(String) : [],
+    ...EMPTY_NOTE_PROPOSAL,
+    summary: transcript.slice(0, 240) || null,
+    task_title: mentionsFollowUp ? "Seguimiento de nota de voz" : null,
+    due_at: null,
+    missing: mentionsFollowUp ? ["due_at"] : [],
   };
 }
 
-function stubExtract(transcript: string): ExtractedNote {
-  const lower = transcript.toLowerCase();
-  const mentionsFollowUp =
-    /\b(follow[\s-]?up|llamar|reunión|reunion|meeting|mañana|tomorrow|próxima|proxima)\b/i.test(
-      transcript,
-    );
-  const hasDate = /\b(20\d{2}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)\b/.test(transcript);
-
-  return {
-    ...EMPTY_EXTRACTED_NOTE,
-    summary: transcript.slice(0, 240) || null,
-    task_title: mentionsFollowUp ? "Follow up from voice note" : null,
-    due_date: hasDate ? null : null,
-    needs_datetime: mentionsFollowUp && !hasDate,
-    raw_mentions: lower ? [transcript.slice(0, 80)] : [],
-  };
+function parseProposal(content: string): NoteProposal {
+  const parsed = JSON.parse(content) as unknown;
+  return noteProposalSchema.parse(parsed);
 }
 
 export type ExtractResult = {
-  extracted: ExtractedNote;
+  proposal: NoteProposal;
   stub: boolean;
 };
 
-export async function extractNoteData(transcript: string): Promise<ExtractResult> {
+export async function extractNoteData(
+  transcript: string,
+  context: ExtractContext,
+): Promise<ExtractResult> {
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
-    return { extracted: stubExtract(transcript), stub: true };
+    return { proposal: stubExtract(transcript), stub: true };
   }
 
   const groq = new Groq({ apiKey });
+  const nowLabel = formatNowInTimezone(context.timezone);
+  const system = buildNoteExtractionSystemPrompt({
+    timezone: context.timezone,
+    nowLabel,
+    contacts: context.contacts,
+  });
+  const user = buildNoteExtractionUserPrompt(transcript);
 
-  try {
+  async function once(): Promise<NoteProposal> {
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       temperature: 0.1,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: NOTE_EXTRACTION_SYSTEM_PROMPT },
-        { role: "user", content: buildNoteExtractionUserPrompt(transcript) },
+        { role: "system", content: system },
+        { role: "user", content: user },
       ],
     });
 
     const content = completion.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(content) as Partial<ExtractedNote>;
-    return { extracted: normalizeExtracted(parsed), stub: false };
-  } catch {
-    return { extracted: stubExtract(transcript), stub: true };
+    return parseProposal(content);
+  }
+
+  try {
+    const proposal = await once();
+    return { proposal, stub: false };
+  } catch (firstError) {
+    try {
+      const proposal = await once();
+      return { proposal, stub: false };
+    } catch (secondError) {
+      const message =
+        secondError instanceof Error
+          ? secondError.message
+          : firstError instanceof Error
+            ? firstError.message
+            : "No se pudo validar la extracción";
+      throw new ExtractionValidationError(message);
+    }
   }
 }
 
-/** Whether a task should be created from extraction. */
-export function shouldCreateTask(extracted: ExtractedNote): boolean {
-  return Boolean(extracted.task_title || extracted.due_date || extracted.needs_datetime);
+export class ExtractionValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ExtractionValidationError";
+  }
 }
 
-/** True when UI should prompt the user to complete date/time. */
-export function needsDatetimeModal(extracted: ExtractedNote): boolean {
-  if (extracted.needs_datetime) return true;
-  if (extracted.task_title && !extracted.due_date) return true;
+/** Whether a task should be created from a proposal. */
+export function shouldCreateTask(proposal: NoteProposal): boolean {
+  return Boolean(proposal.task_title || proposal.due_at);
+}
+
+/** True when UI should require date/time before save. */
+export function needsDueAt(proposal: NoteProposal): boolean {
+  if (proposal.task_title && !proposal.due_at) return true;
+  if (proposal.missing.includes("due_at")) return true;
   return false;
 }

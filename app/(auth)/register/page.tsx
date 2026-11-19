@@ -49,7 +49,7 @@ export default function RegisterPage() {
       return;
     }
 
-    setMessage("Check your email to confirm your account, then sign in.");
+    setMessage("Revisá tu email para confirmar la cuenta y después entrá.");
   }
 
   return (
@@ -57,7 +57,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>crm-voz</CardTitle>
-          <CardDescription>Create an account</CardDescription>
+          <CardDescription>Creá tu cuenta</CardDescription>
         </CardHeader>
         <form onSubmit={(e) => void onSubmit(e)}>
           <CardContent className="space-y-4">
@@ -73,7 +73,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
@@ -85,16 +85,18 @@ export default function RegisterPage() {
               />
             </div>
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+            {message ? (
+              <p className="text-sm text-muted-foreground">{message}</p>
+            ) : null}
           </CardContent>
           <CardFooter className="flex flex-col items-stretch gap-3">
             <Button type="submit" disabled={loading}>
-              {loading ? "Creating…" : "Register"}
+              {loading ? "Creando…" : "Registrarme"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+              ¿Ya tenés cuenta?{" "}
               <Link href="/login" className="underline underline-offset-4">
-                Sign in
+                Entrar
               </Link>
             </p>
           </CardFooter>

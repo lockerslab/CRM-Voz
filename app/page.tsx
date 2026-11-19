@@ -10,21 +10,21 @@ export default function HomePage() {
       />
       <div className="relative z-10 mx-auto max-w-2xl text-center">
         <p className="mb-3 text-sm font-medium tracking-[0.2em] text-slate-500 uppercase">
-          Voice CRM
+          CRM por voz
         </p>
         <h1 className="font-[family-name:var(--font-source-serif)] text-5xl tracking-tight text-slate-900 sm:text-6xl">
           crm-voz
         </h1>
         <p className="mt-4 text-lg text-slate-600">
-          Capture voice notes, extract CRM fields with Groq, and move deals
-          through a live Supabase pipeline.
+          Grabá notas de voz, extraé datos del CRM con Groq y mové deals en un
+          pipeline en vivo con Supabase.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button size="lg" render={<Link href="/login" />}>
-            Sign in
+            Entrar
           </Button>
           <Button size="lg" variant="outline" render={<Link href="/register" />}>
-            Create account
+            Crear cuenta
           </Button>
         </div>
       </div>

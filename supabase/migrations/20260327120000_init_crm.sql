@@ -1,4 +1,4 @@
--- crm-voz initial schema: contacts, interactions, tasks
+-- crm-voz initial schema: contacts, interactions, tasks, profiles
 -- RLS scoped by auth.uid() = user_id
 
 create extension if not exists "pgcrypto";
@@ -21,6 +21,13 @@ create type public.interaction_type as enum (
   'other'
 );
 
+create table public.profiles (
+  id uuid primary key references auth.users (id) on delete cascade,
+  full_name text,
+  timezone text not null default 'America/Argentina/Buenos_Aires',
+  created_at timestamptz not null default now()
+);
+
 create table public.contacts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -29,6 +36,9 @@ create table public.contacts (
   phone text,
   company text,
   stage public.pipeline_stage not null default 'cold_lead',
+  channels text[] not null default '{}',
+  product_interest text,
+  position int not null default 0,
   notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -36,6 +46,7 @@ create table public.contacts (
 
 create index contacts_user_id_idx on public.contacts (user_id);
 create index contacts_user_stage_idx on public.contacts (user_id, stage);
+create index contacts_user_position_idx on public.contacts (user_id, position);
 
 create table public.interactions (
   id uuid primary key default gen_random_uuid(),
@@ -58,6 +69,7 @@ create table public.tasks (
   title text not null,
   due_date timestamptz,
   completed boolean not null default false,
+  notified boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -80,9 +92,41 @@ before update on public.contacts
 for each row
 execute function public.set_updated_at();
 
+-- Auto-create profile on signup
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, full_name)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'full_name', new.email)
+  );
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+after insert on auth.users
+for each row
+execute function public.handle_new_user();
+
+alter table public.profiles enable row level security;
 alter table public.contacts enable row level security;
 alter table public.interactions enable row level security;
 alter table public.tasks enable row level security;
+
+create policy "profiles_select_own"
+  on public.profiles for select
+  using (auth.uid() = id);
+
+create policy "profiles_update_own"
+  on public.profiles for update
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 create policy "contacts_select_own"
   on public.contacts for select
@@ -135,5 +179,43 @@ create policy "tasks_delete_own"
   on public.tasks for delete
   using (auth.uid() = user_id);
 
--- Realtime for pipeline board
+-- Realtime for pipeline board + tasks
 alter publication supabase_realtime add table public.contacts;
+alter publication supabase_realtime add table public.tasks;
+
+-- Private audio storage bucket
+insert into storage.buckets (id, name, public)
+values ('audio', 'audio', false)
+on conflict (id) do nothing;
+
+create policy "audio_select_own"
+  on storage.objects for select
+  using (
+    bucket_id = 'audio'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "audio_insert_own"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'audio'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "audio_update_own"
+  on storage.objects for update
+  using (
+    bucket_id = 'audio'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  )
+  with check (
+    bucket_id = 'audio'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "audio_delete_own"
+  on storage.objects for delete
+  using (
+    bucket_id = 'audio'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );

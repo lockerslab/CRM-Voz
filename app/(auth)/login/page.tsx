@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>crm-voz</CardTitle>
-          <CardDescription>Sign in with email and password</CardDescription>
+          <CardDescription>Entrá con tu email y contraseña</CardDescription>
         </CardHeader>
         <form onSubmit={(e) => void onSubmit(e)}>
           <CardContent className="space-y-4">
@@ -66,7 +66,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
@@ -80,12 +80,12 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col items-stretch gap-3">
             <Button type="submit" disabled={loading}>
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? "Entrando…" : "Entrar"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              No account?{" "}
+              ¿No tenés cuenta?{" "}
               <Link href="/register" className="underline underline-offset-4">
-                Register
+                Registrate
               </Link>
             </p>
           </CardFooter>

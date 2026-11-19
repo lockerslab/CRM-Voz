@@ -30,6 +30,7 @@ export function useContactsRealtime(initial: Contact[] = []) {
         .from("contacts")
         .select("*")
         .eq("user_id", user.id)
+        .order("position", { ascending: true })
         .order("updated_at", { ascending: false });
 
       if (!cancelled && data) {

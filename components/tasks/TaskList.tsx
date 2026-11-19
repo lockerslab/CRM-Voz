@@ -12,7 +12,7 @@ type TaskListProps = {
 export function TaskList({ tasks, onToggleComplete }: TaskListProps) {
   if (tasks.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No tasks yet.</p>
+      <p className="text-sm text-muted-foreground">No hay tareas pendientes.</p>
     );
   }
 
@@ -32,15 +32,15 @@ export function TaskList({ tasks, onToggleComplete }: TaskListProps) {
             <div className="flex flex-wrap gap-1">
               {task.due_date ? (
                 <Badge variant="secondary" className="text-[10px]">
-                  Due {new Date(task.due_date).toLocaleString()}
+                  Vence {new Date(task.due_date).toLocaleString("es-AR")}
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-[10px]">
-                  No due date
+                  Sin fecha
                 </Badge>
               )}
               {task.completed ? (
-                <Badge className="text-[10px]">Done</Badge>
+                <Badge className="text-[10px]">Hecha</Badge>
               ) : null}
             </div>
           </div>
@@ -51,7 +51,7 @@ export function TaskList({ tasks, onToggleComplete }: TaskListProps) {
               variant="ghost"
               onClick={() => onToggleComplete(task)}
             >
-              {task.completed ? "Undo" : "Complete"}
+              {task.completed ? "Deshacer" : "Completar"}
             </Button>
           ) : null}
         </li>

@@ -5,6 +5,30 @@ import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
+type TranscribeBody = {
+  audioPath?: string;
+};
+
+function extensionFromPath(path: string): string {
+  const parts = path.split(".");
+  return parts.length > 1 ? parts[parts.length - 1]! : "webm";
+}
+
+function mimeFromExt(ext: string): string {
+  switch (ext.toLowerCase()) {
+    case "mp4":
+    case "m4a":
+      return "audio/mp4";
+    case "ogg":
+      return "audio/ogg";
+    case "wav":
+      return "audio/wav";
+    case "webm":
+    default:
+      return "audio/webm";
+  }
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -12,22 +36,57 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const formData = await request.formData();
-  const file = formData.get("audio");
+  let body: TranscribeBody;
+  try {
+    body = (await request.json()) as TranscribeBody;
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
 
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "Missing audio file" }, { status: 400 });
+  const audioPath = body.audioPath?.trim();
+  if (!audioPath) {
+    return NextResponse.json(
+      { error: "audioPath es obligatorio" },
+      { status: 400 },
+    );
+  }
+
+  if (!audioPath.startsWith(`${user.id}/`)) {
+    return NextResponse.json(
+      { error: "La ruta de audio no pertenece a tu usuario" },
+      { status: 403 },
+    );
+  }
+
+  const { data: fileData, error: downloadError } = await supabase.storage
+    .from("audio")
+    .download(audioPath);
+
+  if (downloadError || !fileData) {
+    return NextResponse.json(
+      {
+        error:
+          downloadError?.message ??
+          "No se pudo descargar el audio desde Storage",
+      },
+      { status: 404 },
+    );
   }
 
   const apiKey = process.env.GROQ_API_KEY;
+  const ext = extensionFromPath(audioPath);
+  const file = new File([fileData], `audio.${ext}`, {
+    type: mimeFromExt(ext),
+  });
 
   if (!apiKey) {
     const stub: TranscribeResponse = {
       transcript:
-        "[stub transcript] Voice note received. Configure GROQ_API_KEY to enable Whisper.",
+        "[transcripción de prueba] Nota de voz recibida. Configurá GROQ_API_KEY para activar Whisper.",
+      audioPath,
       stub: true,
     };
     return NextResponse.json(stub);
@@ -38,16 +97,19 @@ export async function POST(request: Request) {
     const transcription = await groq.audio.transcriptions.create({
       file,
       model: "whisper-large-v3-turbo",
+      language: "es",
       response_format: "json",
     });
 
-    const body: TranscribeResponse = {
+    const response: TranscribeResponse = {
       transcript: transcription.text ?? "",
+      audioPath,
       stub: false,
     };
-    return NextResponse.json(body);
+    return NextResponse.json(response);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Transcription failed";
+    const message =
+      error instanceof Error ? error.message : "Falló la transcripción";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

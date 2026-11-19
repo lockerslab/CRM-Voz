@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Contact, Interaction, Task } from "@/types";
 import { PIPELINE_STAGE_LABELS } from "@/types";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 type ContactPageProps = {
   params: Promise<{ id: string }>;
@@ -20,9 +20,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) return null;
 
   const { data: contact } = await supabase
     .from("contacts")
@@ -37,20 +35,26 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
   const typedContact = contact as Contact;
 
-  const [{ data: interactions }, { data: tasks }] = await Promise.all([
-    supabase
-      .from("interactions")
-      .select("*")
-      .eq("contact_id", id)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("tasks")
-      .select("*")
-      .eq("contact_id", id)
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: interactions }, { data: tasks }, { data: allContacts }] =
+    await Promise.all([
+      supabase
+        .from("interactions")
+        .select("*")
+        .eq("contact_id", id)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("tasks")
+        .select("*")
+        .eq("contact_id", id)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("contacts")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("name", { ascending: true }),
+    ]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 p-6">
@@ -73,13 +77,25 @@ export default async function ContactPage({ params }: ContactPageProps) {
         <div className="flex flex-wrap gap-2 pt-2 text-sm text-muted-foreground">
           {typedContact.email ? <span>{typedContact.email}</span> : null}
           {typedContact.phone ? <span>{typedContact.phone}</span> : null}
+          {typedContact.product_interest ? (
+            <span>Interés: {typedContact.product_interest}</span>
+          ) : null}
         </div>
+        {typedContact.channels?.length ? (
+          <div className="flex flex-wrap gap-1 pt-1">
+            {typedContact.channels.map((ch) => (
+              <Badge key={ch} variant="outline" className="text-[10px]">
+                {ch}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
       </header>
 
       {typedContact.notes ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Notes</CardTitle>
+            <CardTitle className="text-base">Notas</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm">{typedContact.notes}</p>
@@ -88,33 +104,38 @@ export default async function ContactPage({ params }: ContactPageProps) {
       ) : null}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Add voice note</h2>
-        <VoiceRecorder />
+        <h2 className="text-lg font-medium">Agregar nota de voz</h2>
+        <VoiceRecorder contacts={(allContacts as Contact[]) ?? []} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Tasks</h2>
+        <h2 className="text-lg font-medium">Tareas</h2>
         <TaskList tasks={(tasks as Task[]) ?? []} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Interactions</h2>
+        <h2 className="text-lg font-medium">Interacciones</h2>
         <ul className="space-y-2">
           {((interactions as Interaction[]) ?? []).map((item) => (
             <li key={item.id} className="rounded-lg border p-3 text-sm">
               <div className="mb-1 flex items-center justify-between gap-2">
                 <Badge variant="outline">{item.type}</Badge>
                 <time className="text-xs text-muted-foreground">
-                  {new Date(item.created_at).toLocaleString()}
+                  {new Date(item.created_at).toLocaleString("es-AR")}
                 </time>
               </div>
+              {item.extracted_json?.summary ? (
+                <p className="mb-1 text-sm">{item.extracted_json.summary}</p>
+              ) : null}
               <p className="whitespace-pre-wrap text-muted-foreground">
-                {item.transcript ?? "No transcript"}
+                {item.transcript ?? "Sin transcripción"}
               </p>
             </li>
           ))}
           {(interactions ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No interactions yet.</p>
+            <p className="text-sm text-muted-foreground">
+              Todavía no hay interacciones.
+            </p>
           ) : null}
         </ul>
       </section>

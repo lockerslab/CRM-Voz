@@ -19,7 +19,7 @@ const sourceSerif = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: "crm-voz",
-  description: "Voice CRM powered by Supabase and Groq",
+  description: "CRM por voz con Supabase y Groq",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es-AR">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} antialiased`}
       >
