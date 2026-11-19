@@ -46,6 +46,9 @@ const llmNoteSchema = z.object({
   missing: z.array(z.string()).catch([]),
 });
 
+/** Modelo de chat de Groq. Se puede cambiar con GROQ_CHAT_MODEL sin tocar código. */
+export const DEFAULT_CHAT_MODEL = "openai/gpt-oss-120b";
+
 export type ExtractContext = {
   timezone: string;
   contacts: ContactBrief[];
@@ -135,7 +138,7 @@ export async function extractNoteData(
 
   async function once(): Promise<NoteProposal> {
     const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: process.env.GROQ_CHAT_MODEL || DEFAULT_CHAT_MODEL,
       temperature: 0.1,
       response_format: { type: "json_object" },
       messages: [
