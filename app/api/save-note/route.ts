@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import type { PipelineStage, SaveNotePayload } from "@/types";
+import type { Contact, PipelineStage, SaveNotePayload } from "@/types";
 import { PIPELINE_STAGES } from "@/types";
 
 export const runtime = "nodejs";
@@ -10,6 +10,13 @@ function isStage(value: unknown): value is PipelineStage {
     typeof value === "string" &&
     (PIPELINE_STAGES as readonly string[]).includes(value)
   );
+}
+
+function isEmpty(value: unknown): boolean {
+  if (value == null) return true;
+  if (typeof value === "string" && value.trim() === "") return true;
+  if (Array.isArray(value) && value.length === 0) return true;
+  return false;
 }
 
 export async function POST(request: Request) {
@@ -30,8 +37,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  const contactName = body.contact_name?.trim();
-  if (!contactName) {
+  const contactName = body.contact_name?.trim() ?? "";
+  const isUpdate = body.action === "update" && Boolean(body.contact_id);
+
+  if (!isUpdate && !contactName) {
     return NextResponse.json(
       { error: "El nombre del contacto es obligatorio" },
       { status: 400 },
@@ -62,37 +71,68 @@ export async function POST(request: Request) {
     );
   }
 
-  const stage: PipelineStage = isStage(body.stage) ? body.stage : "cold_lead";
-  const channels = Array.isArray(body.channels) ? body.channels : [];
-
   let contactId = body.contact_id;
+  let resolvedStage: PipelineStage | null = isStage(body.stage)
+    ? body.stage
+    : null;
 
-  if (body.action === "update" && contactId) {
-    const { data: updated, error: updateError } = await supabase
+  if (isUpdate && contactId) {
+    const { data: existing, error: existingError } = await supabase
       .from("contacts")
-      .update({
-        name: contactName,
-        company: body.company,
-        email: body.email,
-        phone: body.phone,
-        stage,
-        channels,
-        product_interest: body.product_interest,
-        notes: body.notes,
-      })
+      .select("*")
       .eq("id", contactId)
       .eq("user_id", user.id)
-      .select("id")
-      .single();
+      .maybeSingle();
 
-    if (updateError || !updated) {
+    if (existingError || !existing) {
       return NextResponse.json(
-        { error: updateError?.message ?? "No se pudo actualizar el contacto" },
-        { status: 400 },
+        { error: existingError?.message ?? "Contacto no encontrado" },
+        { status: 404 },
       );
     }
-    contactId = updated.id as string;
+
+    const current = existing as Contact;
+    // Invalid stage → keep current; never fall back to cold_lead.
+    if (!resolvedStage) {
+      resolvedStage = current.stage;
+    }
+
+    const patch: Record<string, unknown> = {};
+    if (contactName) patch.name = contactName;
+    if (!isEmpty(body.company)) patch.company = body.company;
+    if (!isEmpty(body.email)) patch.email = body.email;
+    if (!isEmpty(body.phone)) patch.phone = body.phone;
+    if (isStage(body.stage)) patch.stage = body.stage;
+    if (!isEmpty(body.channels)) patch.channels = body.channels;
+    if (!isEmpty(body.product_interest)) {
+      patch.product_interest = body.product_interest;
+    }
+    if (!isEmpty(body.notes)) patch.notes = body.notes;
+
+    if (Object.keys(patch).length > 0) {
+      const { data: updated, error: updateError } = await supabase
+        .from("contacts")
+        .update(patch)
+        .eq("id", contactId)
+        .eq("user_id", user.id)
+        .select("id")
+        .single();
+
+      if (updateError || !updated) {
+        return NextResponse.json(
+          {
+            error: updateError?.message ?? "No se pudo actualizar el contacto",
+          },
+          { status: 400 },
+        );
+      }
+      contactId = updated.id as string;
+    }
   } else {
+    const stage: PipelineStage = resolvedStage ?? "cold_lead";
+    resolvedStage = stage;
+    const channels = Array.isArray(body.channels) ? body.channels : [];
+
     const { data: created, error: createError } = await supabase
       .from("contacts")
       .insert({
@@ -118,6 +158,8 @@ export async function POST(request: Request) {
     contactId = created.id as string;
   }
 
+  const channelsForJson = Array.isArray(body.channels) ? body.channels : [];
+
   const { data: interaction, error: interactionError } = await supabase
     .from("interactions")
     .insert({
@@ -128,9 +170,9 @@ export async function POST(request: Request) {
       audio_url: body.audioPath,
       extracted_json: {
         summary: body.summary,
-        channels,
+        channels: channelsForJson,
         product_interest: body.product_interest,
-        stage,
+        stage: resolvedStage,
         task_title: body.task_title,
         due_at: body.due_at,
       },

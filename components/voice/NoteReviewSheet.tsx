@@ -74,6 +74,38 @@ export function NoteReviewSheet({
 
   useEffect(() => {
     if (!proposal || !open) return;
+    setError(null);
+
+    const existing =
+      proposal.action === "update" && proposal.contact_id
+        ? contacts.find((c) => c.id === proposal.contact_id)
+        : undefined;
+
+    if (existing) {
+      // Preload existing contact, then overlay only non-null proposal fields.
+      setMode("update");
+      setContactId(existing.id);
+      setContactName(
+        proposal.contact_name != null ? proposal.contact_name : existing.name,
+      );
+      setCompany(
+        proposal.company != null ? proposal.company : (existing.company ?? ""),
+      );
+      setStage(proposal.stage != null ? proposal.stage : existing.stage);
+      setNotes(existing.notes ?? "");
+      setSummary(proposal.summary != null ? proposal.summary : "");
+      setTaskTitle(proposal.task_title != null ? proposal.task_title : "");
+      if (proposal.due_at != null) {
+        const { date, time } = splitDueAt(proposal.due_at);
+        setDueDate(date);
+        setDueTime(time);
+      } else {
+        setDueDate("");
+        setDueTime("");
+      }
+      return;
+    }
+
     setMode(proposal.action === "update" && proposal.contact_id ? "update" : "create");
     setContactId(proposal.contact_id ?? "");
     setContactName(proposal.contact_name ?? "");
@@ -85,8 +117,7 @@ export function NoteReviewSheet({
     const { date, time } = splitDueAt(proposal.due_at);
     setDueDate(date);
     setDueTime(time);
-    setError(null);
-  }, [proposal, open]);
+  }, [proposal, open, contacts]);
 
   const dueRequired = Boolean(taskTitle.trim()) && !dueDate;
   const canSave = Boolean(contactName.trim()) && !dueRequired && !saving;
