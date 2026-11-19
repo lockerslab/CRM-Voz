@@ -19,6 +19,7 @@ export default function HomePage() {
           <Button
             size="lg"
             className="h-11 w-full rounded-xl bg-[#6D28D9] text-base transition-all duration-200 hover:bg-[#5b21b6]"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Entrar
@@ -27,6 +28,7 @@ export default function HomePage() {
             size="lg"
             variant="outline"
             className="h-11 w-full rounded-xl transition-all duration-200"
+            nativeButton={false}
             render={<Link href="/register" />}
           >
             Crear cuenta

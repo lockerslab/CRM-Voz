@@ -66,6 +66,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
           variant="ghost"
           size="sm"
           className="transition-all duration-200"
+          nativeButton={false}
           render={<Link href="/dashboard" />}
         >
           ← Pipeline
