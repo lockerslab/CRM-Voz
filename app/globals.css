@@ -346,3 +346,13 @@
   }
   .check-btn { border-width: 2.5px; border-color: #111111; }
 }
+
+/* Columna que recibe una tarjeta arrastrada */
+@layer components {
+  .column[data-over="true"] {
+    outline: 3px dashed var(--stage-solid);
+    outline-offset: -3px;
+    background: color-mix(in srgb, var(--stage-bg) 90%, transparent);
+    transform: scale(1.01);
+  }
+}
