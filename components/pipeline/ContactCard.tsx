@@ -83,7 +83,7 @@ export function ContactCard({
             </span>
           ) : null}
           {contact.product_interest ? (
-            <span className="chip stage-chip mt-1.5 max-w-full truncate">{contact.product_interest}</span>
+            <span className="chip stage-chip mt-1.5 max-w-full !rounded-lg !whitespace-normal leading-tight">{contact.product_interest}</span>
           ) : null}
           {nextTask ? (
             <span
@@ -97,7 +97,7 @@ export function ContactCard({
                 </span>
               </span>
               {nextTask.due_date ? (
-                <span className="chip urgency-chip max-w-full truncate">
+                <span className="chip urgency-chip max-w-full !rounded-lg !whitespace-normal leading-tight">
                   {urgencyLabel(nextTask.due_date, clock, timezone, true)}
                 </span>
               ) : null}
