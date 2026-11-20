@@ -4,6 +4,7 @@ import { NoteReviewSheet } from "@/components/voice/NoteReviewSheet";
 import { Button } from "@/components/ui/button";
 import type { Contact, NoteProposal, ProcessNoteResponse, TranscribeResponse } from "@/types";
 import { Mic, Square } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DEFAULT_TIMEZONE } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
@@ -68,6 +69,14 @@ export function VoiceRecorder({
   const [transcript, setTranscript] = useState("");
   const [audioPath, setAudioPath] = useState("");
   const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE);
+  const router = useRouter();
+
+  // Al guardar: refrescar los datos del servidor (tareas, lista de contactos,
+  // interacciones). Los contactos nuevos llegan por Realtime, pero las tareas no.
+  const handleSaved = useCallback(() => {
+    router.refresh();
+    onSaved?.();
+  }, [router, onSaved]);
 
   const cleanupStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -288,7 +297,7 @@ export function VoiceRecorder({
           audioPath={audioPath}
           contacts={contacts}
           timezone={timezone}
-          onSaved={() => onSaved?.()}
+          onSaved={handleSaved}
         />
       </>
     );
@@ -338,7 +347,7 @@ export function VoiceRecorder({
         audioPath={audioPath}
         contacts={contacts}
         timezone={timezone}
-        onSaved={() => onSaved?.()}
+        onSaved={handleSaved}
       />
     </div>
   );
