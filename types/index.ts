@@ -130,6 +130,8 @@ export type TranscribeResponse = {
   transcript: string;
   audioPath: string;
   stub?: boolean;
+  /** Tiempos del servidor (para el medidor ?debug=1) */
+  timing?: { download_ms: number; whisper_ms: number };
 };
 
 export type ProcessNoteResponse = {
@@ -139,6 +141,8 @@ export type ProcessNoteResponse = {
   /** Zona horaria del perfil del usuario (IANA), para armar fechas con offset. */
   timezone: string;
   stub?: boolean;
+  /** Tiempos del servidor (para el medidor ?debug=1) */
+  timing?: { db_ms: number; llm_ms: number };
 };
 
 export type SaveNotePayload = {

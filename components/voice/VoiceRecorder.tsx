@@ -7,6 +7,7 @@ import { Mic, Square } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DEFAULT_TIMEZONE } from "@/lib/dates";
+import { buildTimingReport } from "@/lib/timing";
 import { createClient } from "@/lib/supabase/client";
 
 const MAX_SECONDS = 180;
@@ -69,6 +70,7 @@ export function VoiceRecorder({
   const [transcript, setTranscript] = useState("");
   const [audioPath, setAudioPath] = useState("");
   const [timezone, setTimezone] = useState(DEFAULT_TIMEZONE);
+  const [timingReport, setTimingReport] = useState<string[] | null>(null);
   const router = useRouter();
 
   // Al guardar: refrescar los datos del servidor (tareas, lista de contactos,
@@ -101,6 +103,8 @@ export function VoiceRecorder({
     setBusy(true);
     setError(null);
     setStatus("Subiendo audio…");
+    setTimingReport(null);
+    const tStart = performance.now();
 
     try {
       const supabase = createClient();
@@ -128,8 +132,10 @@ export function VoiceRecorder({
       if (uploadError) {
         throw new Error(uploadError.message);
       }
+      const uploadMs = performance.now() - tStart;
 
       setStatus("Transcribiendo…");
+      const tTranscribe = performance.now();
       const transcribeRes = await fetch("/api/transcribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -146,8 +152,10 @@ export function VoiceRecorder({
         }
         throw new Error(transcribeJson.error ?? "Falló la transcripción");
       }
+      const transcribeMs = performance.now() - tTranscribe;
 
       setStatus("Extrayendo datos…");
+      const tProcess = performance.now();
       const processRes = await fetch("/api/process-note", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,6 +173,20 @@ export function VoiceRecorder({
           await supabase.storage.from("audio").remove([path]);
         }
         throw new Error(processJson.error ?? "Falló el procesamiento");
+      }
+      const processMs = performance.now() - tProcess;
+
+      // Medidor de tiempos: solo si la dirección termina en ?debug=1
+      if (new URLSearchParams(window.location.search).has("debug")) {
+        const report = buildTimingReport({
+          upload_ms: uploadMs,
+          transcribe_total_ms: transcribeMs,
+          process_total_ms: processMs,
+          transcribe: transcribeJson.timing,
+          process: processJson.timing,
+        });
+        setTimingReport(report);
+        console.info("[crm-voz] tiempos\n" + report.join("\n"));
       }
 
       setAudioPath(path);
@@ -267,6 +289,11 @@ export function VoiceRecorder({
                 {error}
               </p>
             ) : null}
+            {timingReport ? (
+              <pre className="max-w-[92vw] whitespace-pre-wrap rounded-xl bg-white/95 p-2.5 text-[10px] leading-snug text-slate-600 shadow ring-1 ring-slate-200">
+                {timingReport.join("\n")}
+              </pre>
+            ) : null}
             <Button
               type="button"
               size="lg"
@@ -338,6 +365,12 @@ export function VoiceRecorder({
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+      {timingReport ? (
+        <pre className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
+          {timingReport.join("\n")}
+        </pre>
+      ) : null}
 
       <NoteReviewSheet
         open={sheetOpen}

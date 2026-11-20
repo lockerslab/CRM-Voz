@@ -62,9 +62,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const tDownload = performance.now();
   const { data: fileData, error: downloadError } = await supabase.storage
     .from("audio")
     .download(audioPath);
+  const downloadMs = Math.round(performance.now() - tDownload);
 
   if (downloadError || !fileData) {
     return NextResponse.json(
@@ -95,6 +97,7 @@ export async function POST(request: Request) {
 
   try {
     const groq = new Groq({ apiKey });
+    const tWhisper = performance.now();
     const transcription = await groq.audio.transcriptions.create({
       file,
       model: "whisper-large-v3-turbo",
@@ -102,6 +105,7 @@ export async function POST(request: Request) {
       response_format: "json",
     });
 
+    const whisperMs = Math.round(performance.now() - tWhisper);
     const check = checkTranscript(transcription.text);
     if (!check.ok) {
       // Silencio / ruido / "frase fantasma" de Whisper: no seguimos al paso de extracción.
@@ -115,6 +119,7 @@ export async function POST(request: Request) {
       transcript: check.text,
       audioPath,
       stub: false,
+      timing: { download_ms: downloadMs, whisper_ms: whisperMs },
     };
     return NextResponse.json(response);
   } catch (error) {
