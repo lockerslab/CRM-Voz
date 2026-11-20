@@ -4,27 +4,31 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DEFAULT_TIMEZONE } from "@/lib/dates";
 import { getUrgency, urgencyLabel } from "@/lib/urgency";
-import { createClient } from "@/lib/supabase/client";
 import type { Contact, PipelineStage, Task } from "@/types";
 import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from "@/types";
 import { CalendarClock, MoreVertical } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 type ContactCardProps = {
   contact: Contact;
   showStageMenu?: boolean;
+  /** Pide mover el contacto a otra etapa. Quien lo recibe se encarga de guardar. */
   onStageChange?: (contactId: string, stage: PipelineStage) => void;
   nextTask?: Task | null;
   now?: Date;
   timezone?: string;
+  /** Se puede arrastrar a otra columna (compu) */
+  draggable?: boolean;
+  isDragging?: boolean;
+  onDragStartCard?: (contactId: string) => void;
+  onDragEndCard?: () => void;
 };
 
 function initialsOf(name: string): string {
@@ -41,30 +45,34 @@ export function ContactCard({
   nextTask = null,
   now,
   timezone = DEFAULT_TIMEZONE,
+  draggable = false,
+  isDragging = false,
+  onDragStartCard,
+  onDragEndCard,
 }: ContactCardProps) {
-  const [moving, setMoving] = useState(false);
   const clock = now ?? new Date();
-
-  async function moveToStage(stage: PipelineStage) {
-    if (stage === contact.stage || moving) return;
-    setMoving(true);
-    onStageChange?.(contact.id, stage);
-    const supabase = createClient();
-    await supabase
-      .from("contacts")
-      .update({ stage })
-      .eq("id", contact.id)
-      .eq("user_id", contact.user_id);
-    setMoving(false);
-  }
 
   return (
     <div
       data-stage={contact.stage}
-      className="surface surface-lift relative"
+      draggable={draggable}
+      onDragStart={
+        draggable
+          ? (e) => {
+              e.dataTransfer.setData("text/plain", contact.id);
+              e.dataTransfer.effectAllowed = "move";
+              onDragStartCard?.(contact.id);
+            }
+          : undefined
+      }
+      onDragEnd={draggable ? () => onDragEndCard?.() : undefined}
+      className={`surface surface-lift relative ${
+        draggable ? "cursor-grab active:cursor-grabbing" : ""
+      } ${isDragging ? "opacity-40" : ""}`}
     >
       <Link
         href={`/contact/${contact.id}`}
+        draggable={false}
         className="flex items-start gap-3 p-3.5"
       >
         <span
@@ -117,29 +125,29 @@ export function ContactCard({
                   variant="ghost"
                   className="size-10 text-muted-foreground transition-all duration-200 hover:text-foreground"
                   aria-label="Mover de etapa"
-                  disabled={moving}
                 />
               }
             >
               <MoreVertical className="size-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-44">
-              <DropdownMenuLabel>Mover a</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {PIPELINE_STAGES.map((stage) => (
-                <DropdownMenuItem
-                  key={stage}
-                  disabled={stage === contact.stage}
-                  onClick={() => void moveToStage(stage)}
-                  className="transition-all duration-200"
-                >
-                  <span
-                    data-stage={stage}
-                    className="stage-solid mr-2 inline-block size-2.5 rounded-full"
-                  />
-                  {PIPELINE_STAGE_LABELS[stage]}
-                </DropdownMenuItem>
-              ))}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Mover a</DropdownMenuLabel>
+                {PIPELINE_STAGES.map((stage) => (
+                  <DropdownMenuItem
+                    key={stage}
+                    disabled={stage === contact.stage}
+                    onClick={() => onStageChange?.(contact.id, stage)}
+                    className="transition-all duration-200"
+                  >
+                    <span
+                      data-stage={stage}
+                      className="stage-solid mr-2 inline-block size-2.5 rounded-full"
+                    />
+                    {PIPELINE_STAGE_LABELS[stage]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

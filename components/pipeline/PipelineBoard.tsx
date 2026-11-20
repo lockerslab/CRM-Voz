@@ -6,7 +6,8 @@ import { useContactsRealtime } from "@/lib/hooks/useContactsRealtime";
 import type { Contact, PipelineStage, Task } from "@/types";
 import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from "@/types";
 import { Mic2, Users } from "lucide-react";
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useRef, useState } from "react";
 
 type PipelineBoardProps = {
   initialContacts?: Contact[];
@@ -35,6 +36,19 @@ export function PipelineBoard({
 }: PipelineBoardProps) {
   const { contacts, setContacts, ready } = useContactsRealtime(initialContacts);
   const [activeStage, setActiveStage] = useState<PipelineStage>("cold_lead");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+  }, []);
+
+  function showNotice(kind: "ok" | "error", text: string) {
+    setNotice({ kind, text });
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(() => setNotice(null), kind === "ok" ? 2500 : 5000);
+  }
 
   const byStage = PIPELINE_STAGES.reduce(
     (acc, stage) => {
@@ -46,10 +60,33 @@ export function PipelineBoard({
     {} as Record<PipelineStage, Contact[]>,
   );
 
-  function onStageChange(contactId: string, stage: PipelineStage) {
-    setContacts((prev) =>
-      prev.map((c) => (c.id === contactId ? { ...c, stage } : c)),
-    );
+  /**
+   * Mueve un contacto a otra etapa (desde el menú ⋮ o arrastrando).
+   * Se ve al instante; si el guardado falla, vuelve a donde estaba y avisa.
+   */
+  async function onStageChange(contactId: string, stage: PipelineStage) {
+    setDraggingId(null);
+    const current = contacts.find((c) => c.id === contactId);
+    if (!current || current.stage === stage) return;
+    const previous = current.stage;
+
+    setContacts((prev) => prev.map((c) => (c.id === contactId ? { ...c, stage } : c)));
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("contacts")
+      .update({ stage })
+      .eq("id", contactId)
+      .eq("user_id", current.user_id);
+
+    if (error) {
+      setContacts((prev) =>
+        prev.map((c) => (c.id === contactId ? { ...c, stage: previous } : c)),
+      );
+      showNotice("error", `No se pudo mover a ${PIPELINE_STAGE_LABELS[stage]}. Probá de nuevo.`);
+      return;
+    }
+    showNotice("ok", `${current.name} pasó a ${PIPELINE_STAGE_LABELS[stage]}`);
   }
 
   const nextTaskFor = (contactId: string) => pickNextTask(tasks, contactId);
@@ -72,6 +109,17 @@ export function PipelineBoard({
     <div className="space-y-3">
       {!ready ? (
         <p className="text-sm text-muted-foreground">Cargando pipeline…</p>
+      ) : null}
+      {notice ? (
+        <p
+          role={notice.kind === "error" ? "alert" : "status"}
+          className={`surface px-4 py-2.5 text-sm font-semibold ${
+            notice.kind === "error" ? "text-destructive" : "text-foreground"
+          }`}
+        >
+          {notice.kind === "ok" ? "✓ " : ""}
+          {notice.text}
+        </p>
       ) : null}
 
       {/* Celular: una etapa por vez, con chips para cambiar */}
@@ -134,6 +182,9 @@ export function PipelineBoard({
             nextTaskFor={nextTaskFor}
             now={now}
             timezone={timezone}
+            draggingId={draggingId}
+            onDragStartCard={setDraggingId}
+            onDragEndCard={() => setDraggingId(null)}
           />
         ))}
       </div>
