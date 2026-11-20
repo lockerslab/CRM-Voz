@@ -1,7 +1,6 @@
 "use client";
 
 import { NoteReviewSheet } from "@/components/voice/NoteReviewSheet";
-import { Button } from "@/components/ui/button";
 import type { Contact, NoteProposal, ProcessNoteResponse, TranscribeResponse } from "@/types";
 import { Mic, Square } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,8 +13,10 @@ const MAX_SECONDS = 180;
 
 type VoiceRecorderProps = {
   contacts?: Contact[];
-  /** Compact floating CTA for mobile dashboard */
+  /** Botón flotante para el celular */
   floating?: boolean;
+  /** "hero": tarjeta grande y protagonista (compu). "compact": versión chica (ficha de contacto). */
+  layout?: "hero" | "compact";
   onSaved?: () => void;
 };
 
@@ -51,6 +52,7 @@ function formatElapsed(elapsed: number): string {
 export function VoiceRecorder({
   contacts = [],
   floating = false,
+  layout = "compact",
   onSaved,
 }: VoiceRecorderProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -269,119 +271,183 @@ export function VoiceRecorder({
   const countdown = formatCountdown(MAX_SECONDS, elapsed);
   const elapsedLabel = formatElapsed(elapsed);
 
+  const sheet = (
+    <NoteReviewSheet
+      open={sheetOpen}
+      onOpenChange={setSheetOpen}
+      proposal={proposal}
+      transcript={transcript}
+      audioPath={audioPath}
+      contacts={contacts}
+      timezone={timezone}
+      onSaved={handleSaved}
+    />
+  );
+
+  const micIcon = recording ? (
+    <Square className="size-1/3 fill-current" />
+  ) : (
+    <Mic className="size-2/5" />
+  );
+
+  const recAria = recording ? "Detener grabación" : "Grabar nota de voz";
+  const onRecClick = () => {
+    if (recording) stopRecording();
+    else void startRecording();
+  };
+
+  const statusText = busy
+    ? status ?? "Procesando…"
+    : recording
+      ? `Grabando · ${elapsedLabel}`
+      : null;
+
+  const feedback = (
+    <>
+      {error ? (
+        <p className="rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-destructive shadow-sm ring-1 ring-black/5">
+          {error}
+        </p>
+      ) : null}
+      {timingReport ? (
+        <pre className="whitespace-pre-wrap rounded-xl bg-white/95 p-3 text-xs leading-relaxed text-foreground/80 ring-1 ring-black/5">
+          {timingReport.join("\n")}
+        </pre>
+      ) : null}
+    </>
+  );
+
+  /* ---------- Celular: botón flotante ---------- */
   if (floating) {
     return (
       <>
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[max(1.25rem,env(safe-area-inset-bottom))] md:hidden">
-          <div className="pointer-events-auto flex flex-col items-center gap-2">
+          <div className="pointer-events-auto flex max-w-[92vw] flex-col items-center gap-2.5">
             {recording ? (
-              <p className="rounded-full bg-white/95 px-3.5 py-1 text-sm font-semibold tabular-nums text-violet-700 shadow-md ring-1 ring-violet-100">
-                {elapsedLabel}
-              </p>
+              <div className="surface flex items-center gap-3 px-4 py-2 text-primary">
+                <span className="eq" aria-hidden>
+                  <span /><span /><span /><span /><span />
+                </span>
+                <span className="text-sm font-bold tabular-nums text-foreground">
+                  {elapsedLabel}
+                  <span className="ml-1 font-medium text-muted-foreground">/ {formatElapsed(MAX_SECONDS)}</span>
+                </span>
+              </div>
             ) : null}
             {busy && status ? (
-              <p className="rounded-full bg-white/95 px-3 py-1 text-xs text-slate-500 shadow-md ring-1 ring-slate-100">
-                {status}
-              </p>
+              <p className="surface px-4 py-2 text-sm font-semibold text-foreground">{status}</p>
             ) : null}
             {error ? (
-              <p className="max-w-xs rounded-xl bg-red-50 px-3 py-1.5 text-center text-xs text-red-600 shadow-sm">
-                {error}
-              </p>
+              <p className="surface px-4 py-2 text-center text-sm font-medium text-destructive">{error}</p>
             ) : null}
             {timingReport ? (
-              <pre className="max-w-[92vw] whitespace-pre-wrap rounded-xl bg-white/95 p-2.5 text-[10px] leading-snug text-slate-600 shadow ring-1 ring-slate-200">
+              <pre className="surface max-w-[92vw] whitespace-pre-wrap p-2.5 text-[10px] leading-snug text-muted-foreground">
                 {timingReport.join("\n")}
               </pre>
             ) : null}
-            <Button
+            <button
               type="button"
-              size="lg"
               disabled={busy}
-              variant="default"
-              className={`size-[72px] rounded-full bg-[#6D28D9] text-white shadow-lg shadow-violet-300/50 transition-all duration-200 hover:bg-[#5b21b6] hover:shadow-xl ${
-                recording ? "animate-record-pulse bg-red-500 hover:bg-red-600" : ""
-              }`}
-              onClick={() => {
-                if (recording) stopRecording();
-                else void startRecording();
-              }}
-              aria-label={recording ? "Detener grabación" : "Grabar nota de voz"}
+              data-recording={recording}
+              className="rec-btn size-[76px]"
+              onClick={onRecClick}
+              aria-label={recAria}
             >
-              {recording ? (
-                <Square className="size-6 fill-current" />
-              ) : (
-                <Mic className="size-7" />
-              )}
-            </Button>
+              {micIcon}
+            </button>
           </div>
         </div>
-        <NoteReviewSheet
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
-          proposal={proposal}
-          transcript={transcript}
-          audioPath={audioPath}
-          contacts={contacts}
-          timezone={timezone}
-          onSaved={handleSaved}
-        />
+        {sheet}
       </>
     );
   }
 
-  return (
-    <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200">
-      <div className="flex flex-wrap items-center gap-3">
-        {!recording ? (
-          <Button
+  /* ---------- Compu: tarjeta héroe ---------- */
+  if (layout === "hero") {
+    return (
+      <div className="hero-card relative flex flex-col justify-between gap-6 overflow-hidden p-6 sm:p-7">
+        <div
+          className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/15 blur-2xl"
+          aria-hidden
+        />
+        <div>
+          <p className="text-sm font-semibold opacity-90">Nota de voz</p>
+          <h2 className="display mt-1 text-[1.7rem] leading-tight">Contame cómo te fue</h2>
+          <p className="mt-1.5 max-w-sm text-sm opacity-90">
+            Hablá como si le escribieras a un colega. Yo cargo el contacto y la tarea.
+          </p>
+        </div>
+
+        <div className="relative flex items-center gap-5">
+          <button
             type="button"
             disabled={busy}
-            className="rounded-full bg-[#6D28D9] px-5 transition-all duration-200 hover:bg-[#5b21b6]"
-            onClick={() => void startRecording()}
+            data-recording={recording}
+            className="rec-btn size-24"
+            onClick={onRecClick}
+            aria-label={recAria}
           >
-            <Mic className="size-4" />
-            Grabar
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="destructive"
-            className="animate-record-pulse rounded-full transition-all duration-200"
-            onClick={stopRecording}
-          >
-            <Square className="size-4 fill-current" />
-            Detener · {elapsedLabel}
-            <span className="opacity-70">({countdown})</span>
-          </Button>
-        )}
-        <span className="text-sm text-slate-500">
-          {busy
-            ? status ?? "Procesando…"
-            : recording
-              ? "Grabando… (máx. 3 min)"
-              : "Listo para grabar"}
-        </span>
+            {micIcon}
+          </button>
+          <div className="min-w-0 space-y-1">
+            {recording ? (
+              <>
+                <span className="eq" aria-hidden>
+                  <span /><span /><span /><span /><span />
+                </span>
+                <p className="text-sm font-bold tabular-nums">
+                  {elapsedLabel}{" "}
+                  <span className="font-medium opacity-80">· quedan {countdown}</span>
+                </p>
+                <p className="text-xs opacity-90">Tocá el botón para terminar</p>
+              </>
+            ) : statusText ? (
+              <p className="text-sm font-bold">{statusText}</p>
+            ) : (
+              <>
+                <p className="text-sm font-bold">Tocá para grabar</p>
+                <p className="text-xs opacity-90">Hasta 3 minutos por nota</p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {error || timingReport ? <div className="relative space-y-2">{feedback}</div> : null}
+        {sheet}
       </div>
+    );
+  }
 
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
+  /* ---------- Compacto: ficha de contacto ---------- */
+  return (
+    <div className="surface space-y-3 p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={busy}
+          data-recording={recording}
+          className="rec-btn size-14"
+          onClick={onRecClick}
+          aria-label={recAria}
+        >
+          {micIcon}
+        </button>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-foreground">
+            {recording ? `Grabando · ${elapsedLabel}` : busy ? status ?? "Procesando…" : "Agregar una nota de voz"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {recording ? `Quedan ${countdown} · tocá para terminar` : "Contame cómo siguió con esta persona"}
+          </p>
+        </div>
+      </div>
+      {error ? <p className="text-sm font-medium text-destructive">{error}</p> : null}
       {timingReport ? (
-        <pre className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-600">
+        <pre className="whitespace-pre-wrap rounded-lg bg-secondary p-3 text-xs leading-relaxed text-muted-foreground">
           {timingReport.join("\n")}
         </pre>
       ) : null}
-
-      <NoteReviewSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        proposal={proposal}
-        transcript={transcript}
-        audioPath={audioPath}
-        contacts={contacts}
-        timezone={timezone}
-        onSaved={handleSaved}
-      />
+      {sheet}
     </div>
   );
 }

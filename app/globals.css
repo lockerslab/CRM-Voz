@@ -54,45 +54,109 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ==========================================================================
+   VESTUARIO ("skin") — Variante A: PULSO
+   Suave, vibrante, con degradé violeta → fucsia → coral.
+   Todo lo visual sale de estas variables: para cambiar de estilo se tocan
+   SOLO los valores de :root (y la tipografía en app/layout.tsx).
+   ========================================================================== */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* shadcn / componentes base */
+  --background: #fbf8ff;
+  --foreground: #1b1230;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #1b1230;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #6d28d9;
+  --popover-foreground: #1b1230;
+  --primary: #7c3aed;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --secondary: #f3eefc;
+  --secondary-foreground: #1b1230;
+  --muted: #f3eefc;
+  --muted-foreground: #6b6385;
   --accent: #f3e8ff;
   --accent-foreground: #5b21b6;
-  --destructive: #f87171;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6d28d9;
-  --chart-1: #6d28d9;
+  --destructive: #e11d48;
+  --border: #ece6f7;
+  --input: #ddd3f1;
+  --ring: #7c3aed;
+  --chart-1: #7c3aed;
   --chart-2: #0ea5e9;
   --chart-3: #f59e0b;
   --chart-4: #10b981;
-  --chart-5: #f87171;
-  --radius: 0.75rem;
+  --chart-5: #f43f5e;
+  --radius: 1rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #6d28d9;
+  --sidebar-foreground: #1b1230;
+  --sidebar-primary: #7c3aed;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f3e8ff;
   --sidebar-accent-foreground: #5b21b6;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #6d28d9;
+  --sidebar-border: #ece6f7;
+  --sidebar-ring: #7c3aed;
   --stage-cold: #64748b;
-  --stage-contacted: #0284c7;
-  --stage-meeting: #d97706;
-  --stage-negotiation: #7c3aed;
-  --stage-won: #059669;
-  --stage-lost: #f87171;
+  --stage-contacted: #0ea5e9;
+  --stage-meeting: #f59e0b;
+  --stage-negotiation: #8b5cf6;
+  --stage-won: #10b981;
+  --stage-lost: #f43f5e;
+
+  /* fondo de la página */
+  --page-bg:
+    radial-gradient(900px 480px at 105% -8%, #ffe6d3 0%, transparent 60%),
+    radial-gradient(800px 480px at -8% 0%, #eadcff 0%, transparent 58%),
+    #fbf8ff;
+
+  /* superficies (tarjetas) */
+  --surface: #ffffff;
+  --surface-border: #eee8f9;
+  --border-w: 1px;
+  --radius-card: 1.25rem;
+  --shadow-card: 0 1px 2px rgb(60 30 120 / 6%), 0 10px 26px -14px rgb(90 40 200 / 22%);
+  --shadow-lift: 0 2px 4px rgb(60 30 120 / 8%), 0 18px 34px -14px rgb(90 40 200 / 34%);
+  --lift-x: 0px;
+  --lift-y: -2px;
+
+  /* tipografía */
+  --display-weight: 800;
+  --display-tracking: -0.02em;
+
+  /* chips */
+  --chip-border-w: 0px;
+  --chip-border: transparent;
+
+  /* tarjeta héroe (grabar) */
+  --hero-bg: linear-gradient(135deg, #7c3aed 0%, #c026d3 52%, #ff6b4a 100%);
+  --hero-fg: #ffffff;
+  --radius-hero: 1.75rem;
+  --shadow-hero: 0 24px 44px -18px rgb(124 58 237 / 60%);
+
+  /* botón de grabar */
+  --rec-bg: linear-gradient(135deg, #7c3aed 0%, #c026d3 55%, #ff6b4a 100%);
+  --rec-fg: #ffffff;
+  --rec-border: 0px solid transparent;
+  --rec-shadow: 0 14px 28px -10px rgb(192 38 211 / 65%);
+  --rec-ring: rgb(192 38 211 / 45%);
+  --rec-active-bg: #ef4444;
+  --rec-active-fg: #ffffff;
+  --rec-hero-bg: #ffffff;
+  --rec-hero-fg: #7c3aed;
+
+  /* etapas del pipeline: fondo / texto / color sólido */
+  --s-cold-bg: #eef0f6;       --s-cold-fg: #475069;       --s-cold: #64748b;
+  --s-contacted-bg: #dff3ff;  --s-contacted-fg: #075985;  --s-contacted: #0ea5e9;
+  --s-meeting-bg: #fff0cc;    --s-meeting-fg: #92400e;    --s-meeting: #f59e0b;
+  --s-negotiation-bg: #efe3ff; --s-negotiation-fg: #5b21b6; --s-negotiation: #8b5cf6;
+  --s-won-bg: #d9f7e8;        --s-won-fg: #047857;        --s-won: #10b981;
+  --s-lost-bg: #ffe4e6;       --s-lost-fg: #be123c;       --s-lost: #f43f5e;
+
+  /* urgencia de tareas */
+  --u-overdue-bg: #ffe4e6;  --u-overdue-fg: #be123c;
+  --u-today-bg: #fff0cc;    --u-today-fg: #92400e;
+  --u-tomorrow-bg: #dff3ff; --u-tomorrow-fg: #075985;
+  --u-soon-bg: #f3e8ff;     --u-soon-fg: #6b21a8;
+  --u-later-bg: #f1f5f9;    --u-later-fg: #475569;
+  --u-none-bg: transparent; --u-none-fg: #94a3b8;
 }
 
 @layer base {
@@ -101,22 +165,151 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    background: var(--page-bg);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
   html {
     @apply font-sans;
   }
 }
 
+/* ==========================================================================
+   Piezas semánticas: los componentes usan ESTAS clases, no colores sueltos.
+   ========================================================================== */
+@layer components {
+  .display {
+    font-family: var(--font-display, var(--font-sans)), var(--font-sans), sans-serif;
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+  }
+
+  .surface {
+    background: var(--surface);
+    border: var(--border-w) solid var(--surface-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+  .surface-lift {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .surface-lift:hover {
+    transform: translate(var(--lift-x), var(--lift-y));
+    box-shadow: var(--shadow-lift);
+  }
+
+  .hero-card {
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    border: var(--border-w) solid var(--surface-border);
+    border-radius: var(--radius-hero);
+    box-shadow: var(--shadow-hero);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: var(--chip-border-w) solid var(--chip-border);
+  }
+
+  /* Etapas: poner data-stage="cold_lead" (etc.) en el elemento */
+  [data-stage="cold_lead"] { --stage-bg: var(--s-cold-bg); --stage-fg: var(--s-cold-fg); --stage-solid: var(--s-cold); }
+  [data-stage="contacted"] { --stage-bg: var(--s-contacted-bg); --stage-fg: var(--s-contacted-fg); --stage-solid: var(--s-contacted); }
+  [data-stage="meeting"] { --stage-bg: var(--s-meeting-bg); --stage-fg: var(--s-meeting-fg); --stage-solid: var(--s-meeting); }
+  [data-stage="negotiation"] { --stage-bg: var(--s-negotiation-bg); --stage-fg: var(--s-negotiation-fg); --stage-solid: var(--s-negotiation); }
+  [data-stage="won"] { --stage-bg: var(--s-won-bg); --stage-fg: var(--s-won-fg); --stage-solid: var(--s-won); }
+  [data-stage="lost"] { --stage-bg: var(--s-lost-bg); --stage-fg: var(--s-lost-fg); --stage-solid: var(--s-lost); }
+
+  .stage-chip { background: var(--stage-bg); color: var(--stage-fg); }
+  .stage-solid { background: var(--stage-solid); }
+  .stage-soft { background: var(--stage-bg); color: var(--stage-fg); }
+
+  /* Urgencia: poner data-urgency="overdue" (etc.) */
+  [data-urgency="overdue"] { --u-bg: var(--u-overdue-bg); --u-fg: var(--u-overdue-fg); }
+  [data-urgency="today"] { --u-bg: var(--u-today-bg); --u-fg: var(--u-today-fg); }
+  [data-urgency="tomorrow"] { --u-bg: var(--u-tomorrow-bg); --u-fg: var(--u-tomorrow-fg); }
+  [data-urgency="soon"] { --u-bg: var(--u-soon-bg); --u-fg: var(--u-soon-fg); }
+  [data-urgency="later"] { --u-bg: var(--u-later-bg); --u-fg: var(--u-later-fg); }
+  [data-urgency="none"] { --u-bg: var(--u-none-bg); --u-fg: var(--u-none-fg); }
+  .urgency-chip { background: var(--u-bg); color: var(--u-fg); }
+
+  /* Botón de grabar */
+  .rec-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: var(--rec-bg);
+    color: var(--rec-fg);
+    border: var(--rec-border);
+    box-shadow: var(--rec-shadow);
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+  .rec-btn:hover:not(:disabled) { filter: brightness(1.06); transform: scale(1.04); }
+  .rec-btn:active:not(:disabled) { transform: scale(0.96); }
+  .rec-btn:disabled { opacity: 0.6; cursor: wait; }
+  .rec-btn[data-recording="true"] {
+    background: var(--rec-active-bg);
+    color: var(--rec-active-fg);
+  }
+  .hero-card .rec-btn:not([data-recording="true"]) {
+    background: var(--rec-hero-bg);
+    color: var(--rec-hero-fg);
+  }
+  .rec-btn[data-recording="true"] { animation: record-pulse 1.4s ease-in-out infinite; }
+
+  /* Ecualizador mientras se graba */
+  .eq { display: inline-flex; align-items: center; gap: 3px; height: 28px; }
+  .eq > span {
+    width: 4px; height: 100%; border-radius: 4px; background: currentColor;
+    transform-origin: center; animation: eq-bounce 0.9s ease-in-out infinite;
+  }
+  .eq > span:nth-child(2) { animation-delay: -0.15s; }
+  .eq > span:nth-child(3) { animation-delay: -0.3s; }
+  .eq > span:nth-child(4) { animation-delay: -0.45s; }
+  .eq > span:nth-child(5) { animation-delay: -0.6s; }
+
+  /* Botón circular de "tarea hecha" */
+  .check-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.25rem; height: 2.25rem; flex-shrink: 0; border-radius: 9999px;
+    border: 2px solid var(--input); color: transparent; background: var(--surface);
+    transition: all 0.15s ease;
+  }
+  .check-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .check-btn[data-done="true"] { background: var(--s-won); border-color: var(--s-won); color: #fff; }
+}
+
 @keyframes record-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgb(109 40 217 / 45%);
-  }
-  50% {
-    box-shadow: 0 0 0 14px rgb(109 40 217 / 0%);
-  }
+  0%, 100% { box-shadow: var(--rec-shadow), 0 0 0 0 var(--rec-ring); }
+  50% { box-shadow: var(--rec-shadow), 0 0 0 16px transparent; }
+}
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
 }
 
 .animate-record-pulse {
   animation: record-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-btn[data-recording="true"], .eq > span, .animate-record-pulse { animation: none; }
+}
+
+/* Columna del pipeline (desktop) */
+@layer components {
+  .column {
+    background: color-mix(in srgb, var(--stage-bg) 48%, transparent);
+    border: var(--border-w) solid var(--surface-border);
+    border-radius: var(--radius-card);
+  }
 }
