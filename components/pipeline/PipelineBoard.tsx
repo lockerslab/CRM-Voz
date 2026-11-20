@@ -140,7 +140,7 @@ export function PipelineBoard({
                 }`}
               >
                 {PIPELINE_STAGE_LABELS[stage]}
-                <span className={`rounded-full px-1.5 text-xs ${active ? "bg-white/25" : "bg-white/60"}`}>
+                <span className={`rounded-full px-1.5 text-xs ${active ? "bg-[color-mix(in_srgb,var(--on-solid)_22%,transparent)]" : "bg-[color-mix(in_srgb,var(--stage-fg)_14%,transparent)]"}`}>
                   {count}
                 </span>
               </button>

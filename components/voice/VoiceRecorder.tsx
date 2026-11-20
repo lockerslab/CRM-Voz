@@ -305,12 +305,12 @@ export function VoiceRecorder({
   const feedback = (
     <>
       {error ? (
-        <p className="rounded-xl bg-white/95 px-3 py-2 text-sm font-medium text-destructive shadow-sm ring-1 ring-black/5">
+        <p className="surface px-3 py-2 text-sm font-medium text-destructive">
           {error}
         </p>
       ) : null}
       {timingReport ? (
-        <pre className="whitespace-pre-wrap rounded-xl bg-white/95 p-3 text-xs leading-relaxed text-foreground/80 ring-1 ring-black/5">
+        <pre className="surface whitespace-pre-wrap p-3 text-xs leading-relaxed text-muted-foreground">
           {timingReport.join("\n")}
         </pre>
       ) : null}

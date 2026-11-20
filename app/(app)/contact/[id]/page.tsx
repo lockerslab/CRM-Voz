@@ -3,6 +3,7 @@ import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemePicker } from "@/components/theme/ThemePicker";
 import { formatStamp } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { Contact, Interaction, Task } from "@/types";
@@ -74,9 +75,12 @@ export default async function ContactPage({ params }: ContactPageProps) {
         >
           ← Pipeline
         </Button>
-        <span className="chip stage-chip px-3 py-1 text-sm">
-          {PIPELINE_STAGE_LABELS[typedContact.stage]}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="chip stage-chip px-3 py-1 text-sm">
+            {PIPELINE_STAGE_LABELS[typedContact.stage]}
+          </span>
+          <ThemePicker />
+        </div>
       </div>
 
       <header className="surface relative space-y-1 overflow-hidden p-5">

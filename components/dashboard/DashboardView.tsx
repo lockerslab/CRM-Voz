@@ -3,9 +3,11 @@
 import { PipelineBoard } from "@/components/pipeline/PipelineBoard";
 import { TaskList } from "@/components/tasks/TaskList";
 import { VoiceRecorder } from "@/components/voice/VoiceRecorder";
+import { ThemePicker } from "@/components/theme/ThemePicker";
 import { DEFAULT_TIMEZONE } from "@/lib/dates";
 import { useNow } from "@/lib/hooks/useNow";
 import { getUrgency } from "@/lib/urgency";
+import type { Theme } from "@/lib/theme";
 import type { Contact, Task } from "@/types";
 import { Mic } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +23,8 @@ type DashboardViewProps = {
   /** Hora del servidor (ISO), para que servidor y navegador coincidan */
   nowIso: string;
   timezone?: string;
+  /** Diseño guardado en el perfil del usuario */
+  profileTheme?: Theme | null;
 };
 
 function greeting(now: Date, timeZone: string): string {
@@ -41,6 +45,7 @@ export function DashboardView({
   email,
   nowIso,
   timezone = DEFAULT_TIMEZONE,
+  profileTheme = null,
 }: DashboardViewProps) {
   const now = useNow(nowIso);
 
@@ -70,13 +75,16 @@ export function DashboardView({
           </span>
           <span className="display text-xl text-foreground">crm-voz</span>
         </Link>
-        <Link
-          href="/login"
-          title={email ?? "Cuenta"}
-          className="surface flex size-11 items-center justify-center rounded-full text-sm font-extrabold text-primary"
-        >
-          {initials}
-        </Link>
+        <div className="flex items-center gap-2">
+          <ThemePicker profileTheme={profileTheme} />
+          <Link
+            href="/login"
+            title={email ?? "Cuenta"}
+            className="surface flex size-11 items-center justify-center rounded-full text-sm font-extrabold text-primary"
+          >
+            {initials}
+          </Link>
+        </div>
       </header>
 
       {/* Saludo + resumen del día */}
