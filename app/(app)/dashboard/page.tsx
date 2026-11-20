@@ -1,5 +1,6 @@
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import { createClient } from "@/lib/supabase/server";
+import { THEMES, type Theme } from "@/lib/theme";
 import type { Contact, Task } from "@/types";
 
 function initialsFromEmail(email: string | undefined): string {
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
   // Layout already redirects if unauthenticated; user is guaranteed here.
   if (!user) return null;
 
-  const [{ data: contacts }, { data: tasks }] = await Promise.all([
+  const [{ data: contacts }, { data: tasks }, { data: profile }] = await Promise.all([
     supabase
       .from("contacts")
       .select("*")
@@ -40,7 +41,15 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .eq("completed", false)
       .order("due_date", { ascending: true }),
+    // Diseño guardado en el perfil. Si la columna todavía no existe (migración
+    // pendiente), devuelve error y simplemente se ignora.
+    supabase.from("profiles").select("theme").eq("id", user.id).maybeSingle(),
   ]);
+
+  const savedTheme = (profile as { theme?: string | null } | null)?.theme;
+  const profileTheme: Theme | null = (THEMES as readonly string[]).includes(savedTheme ?? "")
+    ? (savedTheme as Theme)
+    : null;
 
   const contactList = (contacts as Contact[]) ?? [];
   const taskList = (tasks as Task[]) ?? [];
@@ -53,6 +62,7 @@ export default async function DashboardPage() {
       firstName={firstNameFromEmail(user.email)}
       email={user.email}
       nowIso={new Date().toISOString()}
+      profileTheme={profileTheme}
     />
   );
 }
