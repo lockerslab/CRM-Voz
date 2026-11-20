@@ -55,108 +55,108 @@
 }
 
 /* ==========================================================================
-   VESTUARIO ("skin") — Variante A: PULSO
-   Suave, vibrante, con degradé violeta → fucsia → coral.
-   Todo lo visual sale de estas variables: para cambiar de estilo se tocan
-   SOLO los valores de :root (y la tipografía en app/layout.tsx).
+   VESTUARIO ("skin") — Variante B: CALLE
+   Audaz y con onda: crema con puntitos, bordes negros gruesos, sombras
+   "recortadas" tipo sticker, amarillo y violeta eléctrico.
+   Misma estructura que la Variante A: solo cambian estos valores.
    ========================================================================== */
 :root {
   /* shadcn / componentes base */
-  --background: #fbf8ff;
-  --foreground: #1b1230;
+  --background: #fff6dc;
+  --foreground: #111111;
   --card: #ffffff;
-  --card-foreground: #1b1230;
+  --card-foreground: #111111;
   --popover: #ffffff;
-  --popover-foreground: #1b1230;
-  --primary: #7c3aed;
+  --popover-foreground: #111111;
+  --primary: #5b2eff;
   --primary-foreground: #ffffff;
-  --secondary: #f3eefc;
-  --secondary-foreground: #1b1230;
-  --muted: #f3eefc;
-  --muted-foreground: #6b6385;
-  --accent: #f3e8ff;
-  --accent-foreground: #5b21b6;
+  --secondary: #ffeeb3;
+  --secondary-foreground: #111111;
+  --muted: #fff0c2;
+  --muted-foreground: #4a4a4a;
+  --accent: #ffe58a;
+  --accent-foreground: #111111;
   --destructive: #e11d48;
-  --border: #ece6f7;
-  --input: #ddd3f1;
-  --ring: #7c3aed;
-  --chart-1: #7c3aed;
-  --chart-2: #0ea5e9;
-  --chart-3: #f59e0b;
-  --chart-4: #10b981;
-  --chart-5: #f43f5e;
-  --radius: 1rem;
+  --border: #111111;
+  --input: #111111;
+  --ring: #5b2eff;
+  --chart-1: #5b2eff;
+  --chart-2: #38bdf8;
+  --chart-3: #facc15;
+  --chart-4: #4ade80;
+  --chart-5: #fb7185;
+  --radius: 0.75rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1b1230;
-  --sidebar-primary: #7c3aed;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #5b2eff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3e8ff;
-  --sidebar-accent-foreground: #5b21b6;
-  --sidebar-border: #ece6f7;
-  --sidebar-ring: #7c3aed;
-  --stage-cold: #64748b;
-  --stage-contacted: #0ea5e9;
-  --stage-meeting: #f59e0b;
-  --stage-negotiation: #8b5cf6;
-  --stage-won: #10b981;
-  --stage-lost: #f43f5e;
+  --sidebar-accent: #ffe58a;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #111111;
+  --sidebar-ring: #5b2eff;
+  --stage-cold: #9ca3af;
+  --stage-contacted: #38bdf8;
+  --stage-meeting: #facc15;
+  --stage-negotiation: #a78bfa;
+  --stage-won: #4ade80;
+  --stage-lost: #fb7185;
 
-  /* fondo de la página */
+  /* fondo de la página: crema con puntitos */
   --page-bg:
-    radial-gradient(900px 480px at 105% -8%, #ffe6d3 0%, transparent 60%),
-    radial-gradient(800px 480px at -8% 0%, #eadcff 0%, transparent 58%),
-    #fbf8ff;
+    radial-gradient(rgb(17 17 17 / 13%) 1.2px, transparent 1.2px) 0 0 / 20px 20px,
+    #fff6dc;
 
   /* superficies (tarjetas) */
   --surface: #ffffff;
-  --surface-border: #eee8f9;
-  --border-w: 1px;
-  --radius-card: 1.25rem;
-  --shadow-card: 0 1px 2px rgb(60 30 120 / 6%), 0 10px 26px -14px rgb(90 40 200 / 22%);
-  --shadow-lift: 0 2px 4px rgb(60 30 120 / 8%), 0 18px 34px -14px rgb(90 40 200 / 34%);
-  --lift-x: 0px;
+  --surface-border: #111111;
+  --border-w: 2px;
+  --radius-card: 1rem;
+  --shadow-card: 4px 4px 0 #111111;
+  --shadow-lift: 6px 6px 0 #111111;
+  --lift-x: -2px;
   --lift-y: -2px;
 
   /* tipografía */
-  --display-weight: 800;
-  --display-tracking: -0.02em;
+  --display-weight: 700;
+  --display-tracking: -0.015em;
+  --on-solid: #111111;
 
   /* chips */
-  --chip-border-w: 0px;
-  --chip-border: transparent;
+  --chip-border-w: 1.5px;
+  --chip-border: #111111;
 
   /* tarjeta héroe (grabar) */
-  --hero-bg: linear-gradient(135deg, #7c3aed 0%, #c026d3 52%, #ff6b4a 100%);
-  --hero-fg: #ffffff;
-  --radius-hero: 1.75rem;
-  --shadow-hero: 0 24px 44px -18px rgb(124 58 237 / 60%);
+  --hero-bg: #ffd23f;
+  --hero-fg: #111111;
+  --radius-hero: 1.25rem;
+  --shadow-hero: 6px 6px 0 #111111;
 
   /* botón de grabar */
-  --rec-bg: linear-gradient(135deg, #7c3aed 0%, #c026d3 55%, #ff6b4a 100%);
+  --rec-bg: #5b2eff;
   --rec-fg: #ffffff;
-  --rec-border: 0px solid transparent;
-  --rec-shadow: 0 14px 28px -10px rgb(192 38 211 / 65%);
-  --rec-ring: rgb(192 38 211 / 45%);
-  --rec-active-bg: #ef4444;
-  --rec-active-fg: #ffffff;
-  --rec-hero-bg: #ffffff;
-  --rec-hero-fg: #7c3aed;
+  --rec-border: 3px solid #111111;
+  --rec-shadow: 5px 5px 0 #111111;
+  --rec-ring: rgb(91 46 255 / 45%);
+  --rec-active-bg: #ff4d4d;
+  --rec-active-fg: #111111;
+  --rec-hero-bg: #111111;
+  --rec-hero-fg: #ffd23f;
 
   /* etapas del pipeline: fondo / texto / color sólido */
-  --s-cold-bg: #eef0f6;       --s-cold-fg: #475069;       --s-cold: #64748b;
-  --s-contacted-bg: #dff3ff;  --s-contacted-fg: #075985;  --s-contacted: #0ea5e9;
-  --s-meeting-bg: #fff0cc;    --s-meeting-fg: #92400e;    --s-meeting: #f59e0b;
-  --s-negotiation-bg: #efe3ff; --s-negotiation-fg: #5b21b6; --s-negotiation: #8b5cf6;
-  --s-won-bg: #d9f7e8;        --s-won-fg: #047857;        --s-won: #10b981;
-  --s-lost-bg: #ffe4e6;       --s-lost-fg: #be123c;       --s-lost: #f43f5e;
+  --s-cold-bg: #e5e7eb;       --s-cold-fg: #111111;       --s-cold: #9ca3af;
+  --s-contacted-bg: #bae6fd;  --s-contacted-fg: #111111;  --s-contacted: #38bdf8;
+  --s-meeting-bg: #fef08a;    --s-meeting-fg: #111111;    --s-meeting: #facc15;
+  --s-negotiation-bg: #ddd6fe; --s-negotiation-fg: #111111; --s-negotiation: #a78bfa;
+  --s-won-bg: #bbf7d0;        --s-won-fg: #111111;        --s-won: #4ade80;
+  --s-lost-bg: #fecdd3;       --s-lost-fg: #111111;       --s-lost: #fb7185;
 
   /* urgencia de tareas */
-  --u-overdue-bg: #ffe4e6;  --u-overdue-fg: #be123c;
-  --u-today-bg: #fff0cc;    --u-today-fg: #92400e;
-  --u-tomorrow-bg: #dff3ff; --u-tomorrow-fg: #075985;
-  --u-soon-bg: #f3e8ff;     --u-soon-fg: #6b21a8;
-  --u-later-bg: #f1f5f9;    --u-later-fg: #475569;
-  --u-none-bg: transparent; --u-none-fg: #94a3b8;
+  --u-overdue-bg: #ff6b6b;  --u-overdue-fg: #111111;
+  --u-today-bg: #ffd23f;    --u-today-fg: #111111;
+  --u-tomorrow-bg: #7dd3fc; --u-tomorrow-fg: #111111;
+  --u-soon-bg: #c4b5fd;     --u-soon-fg: #111111;
+  --u-later-bg: #e5e7eb;    --u-later-fg: #111111;
+  --u-none-bg: transparent; --u-none-fg: #6b7280;
 }
 
 @layer base {
@@ -285,7 +285,7 @@
     transition: all 0.15s ease;
   }
   .check-btn:hover { border-color: var(--primary); color: var(--primary); }
-  .check-btn[data-done="true"] { background: var(--s-won); border-color: var(--s-won); color: #fff; }
+  .check-btn[data-done="true"] { background: var(--s-won); border-color: var(--surface-border); color: var(--on-solid); }
 }
 
 @keyframes record-pulse {
@@ -312,4 +312,37 @@
     border: var(--border-w) solid var(--surface-border);
     border-radius: var(--radius-card);
   }
+}
+
+/* ==========================================================================
+   Detalles propios de "Calle": botones, campos y hoja con borde negro grueso
+   ========================================================================== */
+@layer components {
+  [data-slot="button"].bg-primary,
+  [data-slot="button"].border-border {
+    border: 2px solid #111111;
+    box-shadow: 3px 3px 0 #111111;
+    font-weight: 700;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  [data-slot="button"].bg-primary:hover,
+  [data-slot="button"].border-border:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 #111111;
+  }
+  [data-slot="button"].bg-primary:active,
+  [data-slot="button"].border-border:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #111111;
+  }
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"] {
+    border-width: 2px;
+    background: #ffffff;
+  }
+  [data-slot="sheet-content"] {
+    border-top: 3px solid #111111;
+  }
+  .check-btn { border-width: 2.5px; border-color: #111111; }
 }

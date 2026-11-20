@@ -88,7 +88,7 @@ export function PipelineBoard({
                 onClick={() => setActiveStage(stage)}
                 aria-pressed={active}
                 className={`chip min-h-10 shrink-0 px-3.5 text-sm transition-all duration-150 ${
-                  active ? "stage-solid text-white shadow-md" : "stage-chip"
+                  active ? "stage-solid text-[color:var(--on-solid)] shadow-md" : "stage-chip"
                 }`}
               >
                 {PIPELINE_STAGE_LABELS[stage]}

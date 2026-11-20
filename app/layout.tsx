@@ -1,10 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { DM_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-// Tipografía de la Variante A (Pulso): redondeada, amigable, muy legible en celular.
-const font = Plus_Jakarta_Sans({
+// Tipografía de la Variante B (Calle): títulos Space Grotesk (con carácter),
+// texto DM Sans (limpio y legible en celular).
+const body = DM_Sans({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+const display = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -16,7 +21,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#7c3aed",
+  themeColor: "#ffd23f",
 };
 
 export default function RootLayout({
@@ -26,7 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es-AR">
-      <body className={`${font.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${body.variable} ${display.variable} font-sans antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
