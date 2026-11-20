@@ -1,25 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const sourceSerif = Source_Serif_4({
-  variable: "--font-source-serif",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: "crm-voz",
-  description: "Voice CRM powered by Supabase and Groq",
+  description: "CRM por voz con Supabase y Groq",
 };
 
 export default function RootLayout({
@@ -28,12 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html lang="es-AR">
+      <body className={`${inter.variable} font-sans antialiased`}>{children}</body>
     </html>
   );
 }

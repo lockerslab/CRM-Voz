@@ -3,28 +3,35 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#dbeafe_0%,_transparent_55%),linear-gradient(180deg,#f8fafc_0%,#e2e8f0_100%)]"
-      />
-      <div className="relative z-10 mx-auto max-w-2xl text-center">
-        <p className="mb-3 text-sm font-medium tracking-[0.2em] text-slate-500 uppercase">
-          Voice CRM
+    <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm transition-all duration-200">
+        <p className="text-xs font-semibold tracking-[0.18em] text-violet-600 uppercase">
+          CRM por voz
         </p>
-        <h1 className="font-[family-name:var(--font-source-serif)] text-5xl tracking-tight text-slate-900 sm:text-6xl">
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
           crm-voz
         </h1>
-        <p className="mt-4 text-lg text-slate-600">
-          Capture voice notes, extract CRM fields with Groq, and move deals
-          through a live Supabase pipeline.
+        <p className="mt-3 text-[15px] leading-relaxed text-slate-500">
+          Grabá notas de voz, extraé datos del CRM y mové deals desde el
+          celular.
         </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg" render={<Link href="/login" />}>
-            Sign in
+        <div className="mt-8 flex flex-col gap-2.5">
+          <Button
+            size="lg"
+            className="h-11 w-full rounded-xl bg-[#6D28D9] text-base transition-all duration-200 hover:bg-[#5b21b6]"
+            nativeButton={false}
+            render={<Link href="/login" />}
+          >
+            Entrar
           </Button>
-          <Button size="lg" variant="outline" render={<Link href="/register" />}>
-            Create account
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-11 w-full rounded-xl transition-all duration-200"
+            nativeButton={false}
+            render={<Link href="/register" />}
+          >
+            Crear cuenta
           </Button>
         </div>
       </div>

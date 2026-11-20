@@ -39,3 +39,7 @@ npm run dev
 ## Pipeline stages
 
 `cold_lead` → `contacted` → `meeting` → `negotiation` → `won` / `lost`
+
+## Repository
+
+https://github.com/lockerslab/CRM-Voz

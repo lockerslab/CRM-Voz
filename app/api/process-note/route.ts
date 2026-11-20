@@ -1,22 +1,18 @@
 import { NextResponse } from "next/server";
 import {
+  ExtractionValidationError,
   extractNoteData,
-  needsDatetimeModal,
-  shouldCreateTask,
+  isProposalEmpty,
 } from "@/lib/ai/extractData";
 import { createClient } from "@/lib/supabase/server";
-import type { ProcessNoteResponse, Task } from "@/types";
+import type { ProcessNoteResponse } from "@/types";
 
 export const runtime = "nodejs";
 
 type ProcessNoteBody = {
   transcript?: string;
-  contact_id?: string | null;
+  audioPath?: string;
 };
-
-function buildDueIso(dueDate: string, dueTime: string | null): string {
-  return dueTime ? `${dueDate}T${dueTime}:00` : `${dueDate}T09:00:00`;
-}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -25,54 +21,101 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
   let body: ProcessNoteBody;
   try {
     body = (await request.json()) as ProcessNoteBody;
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
   const transcript = body.transcript?.trim();
+  const audioPath = body.audioPath?.trim();
+
   if (!transcript) {
-    return NextResponse.json({ error: "transcript is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "transcript es obligatorio" },
+      { status: 400 },
+    );
+  }
+  if (!audioPath) {
+    return NextResponse.json(
+      { error: "audioPath es obligatorio" },
+      { status: 400 },
+    );
+  }
+  if (!audioPath.startsWith(`${user.id}/`)) {
+    return NextResponse.json(
+      { error: "La ruta de audio no pertenece a tu usuario" },
+      { status: 403 },
+    );
   }
 
-  const { extracted, stub } = await extractNoteData(transcript);
-  const showModal = needsDatetimeModal(extracted);
+  const [{ data: profile }, { data: contacts }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("timezone")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("contacts")
+      .select("id, name, company")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false }),
+  ]);
 
-  let task: Task | null = null;
+  const timezone =
+    (profile as { timezone?: string } | null)?.timezone ??
+    "America/Argentina/Buenos_Aires";
 
-  // Spec: if extract JSON has due_date → create task.
-  // If date/time missing → return needsDatetimeModal for UI completion.
-  if (extracted.due_date && shouldCreateTask(extracted)) {
-    const { data, error } = await supabase
-      .from("tasks")
-      .insert({
-        user_id: user.id,
-        contact_id: body.contact_id ?? null,
-        title: extracted.task_title ?? "Follow up",
-        due_date: new Date(
-          buildDueIso(extracted.due_date, extracted.due_time),
-        ).toISOString(),
-        completed: false,
-      })
-      .select("*")
-      .single();
+  try {
+    const { proposal, stub } = await extractNoteData(transcript, {
+      timezone,
+      contacts: (contacts ?? []).map((c) => ({
+        id: c.id as string,
+        name: c.name as string,
+        company: (c.company as string | null) ?? null,
+      })),
+    });
 
-    if (!error && data) {
-      task = data as Task;
+    // Con la clave de Groq configurada (no stub), una propuesta totalmente vacía
+    // casi seguro viene de audio sin contenido real: no abrimos una pantalla vacía.
+    if (!stub && isProposalEmpty(proposal)) {
+      return NextResponse.json(
+        {
+          error:
+            "No encontré datos de una nota de ventas 🤔 Probá de nuevo contando con quién hablaste y qué sigue.",
+          code: "empty_note",
+        },
+        { status: 422 },
+      );
     }
+
+    const response: ProcessNoteResponse = {
+      proposal,
+      audioPath,
+      transcript,
+      timezone,
+      stub,
+    };
+
+    // Endpoint does NOT persist — only returns the proposal.
+    return NextResponse.json(response);
+  } catch (error) {
+    if (error instanceof ExtractionValidationError) {
+      return NextResponse.json(
+        {
+          error:
+            "No pude interpretar la nota de voz. Probá de nuevo o completá los datos a mano.",
+          detail: error.message,
+        },
+        { status: 422 },
+      );
+    }
+    const message =
+      error instanceof Error ? error.message : "Falló el procesamiento";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
-
-  const response: ProcessNoteResponse = {
-    extracted,
-    task,
-    needsDatetimeModal: showModal,
-    stub,
-  };
-
-  return NextResponse.json(response);
 }

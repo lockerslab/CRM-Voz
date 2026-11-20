@@ -49,15 +49,17 @@ export default function RegisterPage() {
       return;
     }
 
-    setMessage("Check your email to confirm your account, then sign in.");
+    setMessage("Revisá tu email para confirmar la cuenta y después entrá.");
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>crm-voz</CardTitle>
-          <CardDescription>Create an account</CardDescription>
+    <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
+      <Card className="w-full max-w-md rounded-2xl border-slate-200 bg-white shadow-sm transition-all duration-200">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            crm-voz
+          </CardTitle>
+          <CardDescription>Creá tu cuenta</CardDescription>
         </CardHeader>
         <form onSubmit={(e) => void onSubmit(e)}>
           <CardContent className="space-y-4">
@@ -68,33 +70,44 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
+                className="h-10 rounded-xl transition-all duration-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
                 type="password"
                 autoComplete="new-password"
                 required
                 minLength={6}
+                className="h-10 rounded-xl transition-all duration-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            {message ? (
+              <p className="text-sm text-slate-500">{message}</p>
+            ) : null}
           </CardContent>
-          <CardFooter className="flex flex-col items-stretch gap-3">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Creating…" : "Register"}
+          <CardFooter className="flex flex-col items-stretch gap-3 bg-transparent">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="h-11 rounded-xl bg-[#6D28D9] transition-all duration-200 hover:bg-[#5b21b6]"
+            >
+              {loading ? "Creando…" : "Registrarme"}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link href="/login" className="underline underline-offset-4">
-                Sign in
+            <p className="text-center text-sm text-slate-500">
+              ¿Ya tenés cuenta?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-violet-700 underline-offset-4 transition-all duration-200 hover:underline"
+              >
+                Entrar
               </Link>
             </p>
           </CardFooter>
