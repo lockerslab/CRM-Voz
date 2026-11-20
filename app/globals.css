@@ -54,45 +54,109 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ==========================================================================
+   VESTUARIO ("skin") — Variante B: CALLE
+   Audaz y con onda: crema con puntitos, bordes negros gruesos, sombras
+   "recortadas" tipo sticker, amarillo y violeta eléctrico.
+   Misma estructura que la Variante A: solo cambian estos valores.
+   ========================================================================== */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* shadcn / componentes base */
+  --background: #fff6dc;
+  --foreground: #111111;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #111111;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #6d28d9;
+  --popover-foreground: #111111;
+  --primary: #5b2eff;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f3e8ff;
-  --accent-foreground: #5b21b6;
-  --destructive: #f87171;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6d28d9;
-  --chart-1: #6d28d9;
-  --chart-2: #0ea5e9;
-  --chart-3: #f59e0b;
-  --chart-4: #10b981;
-  --chart-5: #f87171;
+  --secondary: #ffeeb3;
+  --secondary-foreground: #111111;
+  --muted: #fff0c2;
+  --muted-foreground: #4a4a4a;
+  --accent: #ffe58a;
+  --accent-foreground: #111111;
+  --destructive: #e11d48;
+  --border: #111111;
+  --input: #111111;
+  --ring: #5b2eff;
+  --chart-1: #5b2eff;
+  --chart-2: #38bdf8;
+  --chart-3: #facc15;
+  --chart-4: #4ade80;
+  --chart-5: #fb7185;
   --radius: 0.75rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #6d28d9;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #5b2eff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3e8ff;
-  --sidebar-accent-foreground: #5b21b6;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #6d28d9;
-  --stage-cold: #64748b;
-  --stage-contacted: #0284c7;
-  --stage-meeting: #d97706;
-  --stage-negotiation: #7c3aed;
-  --stage-won: #059669;
-  --stage-lost: #f87171;
+  --sidebar-accent: #ffe58a;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #111111;
+  --sidebar-ring: #5b2eff;
+  --stage-cold: #9ca3af;
+  --stage-contacted: #38bdf8;
+  --stage-meeting: #facc15;
+  --stage-negotiation: #a78bfa;
+  --stage-won: #4ade80;
+  --stage-lost: #fb7185;
+
+  /* fondo de la página: crema con puntitos */
+  --page-bg:
+    radial-gradient(rgb(17 17 17 / 13%) 1.2px, transparent 1.2px) 0 0 / 20px 20px,
+    #fff6dc;
+
+  /* superficies (tarjetas) */
+  --surface: #ffffff;
+  --surface-border: #111111;
+  --border-w: 2px;
+  --radius-card: 1rem;
+  --shadow-card: 4px 4px 0 #111111;
+  --shadow-lift: 6px 6px 0 #111111;
+  --lift-x: -2px;
+  --lift-y: -2px;
+
+  /* tipografía */
+  --display-weight: 700;
+  --display-tracking: -0.015em;
+  --on-solid: #111111;
+
+  /* chips */
+  --chip-border-w: 1.5px;
+  --chip-border: #111111;
+
+  /* tarjeta héroe (grabar) */
+  --hero-bg: #ffd23f;
+  --hero-fg: #111111;
+  --radius-hero: 1.25rem;
+  --shadow-hero: 6px 6px 0 #111111;
+
+  /* botón de grabar */
+  --rec-bg: #5b2eff;
+  --rec-fg: #ffffff;
+  --rec-border: 3px solid #111111;
+  --rec-shadow: 5px 5px 0 #111111;
+  --rec-ring: rgb(91 46 255 / 45%);
+  --rec-active-bg: #ff4d4d;
+  --rec-active-fg: #111111;
+  --rec-hero-bg: #111111;
+  --rec-hero-fg: #ffd23f;
+
+  /* etapas del pipeline: fondo / texto / color sólido */
+  --s-cold-bg: #e5e7eb;       --s-cold-fg: #111111;       --s-cold: #9ca3af;
+  --s-contacted-bg: #bae6fd;  --s-contacted-fg: #111111;  --s-contacted: #38bdf8;
+  --s-meeting-bg: #fef08a;    --s-meeting-fg: #111111;    --s-meeting: #facc15;
+  --s-negotiation-bg: #ddd6fe; --s-negotiation-fg: #111111; --s-negotiation: #a78bfa;
+  --s-won-bg: #bbf7d0;        --s-won-fg: #111111;        --s-won: #4ade80;
+  --s-lost-bg: #fecdd3;       --s-lost-fg: #111111;       --s-lost: #fb7185;
+
+  /* urgencia de tareas */
+  --u-overdue-bg: #ff6b6b;  --u-overdue-fg: #111111;
+  --u-today-bg: #ffd23f;    --u-today-fg: #111111;
+  --u-tomorrow-bg: #7dd3fc; --u-tomorrow-fg: #111111;
+  --u-soon-bg: #c4b5fd;     --u-soon-fg: #111111;
+  --u-later-bg: #e5e7eb;    --u-later-fg: #111111;
+  --u-none-bg: transparent; --u-none-fg: #6b7280;
 }
 
 @layer base {
@@ -101,22 +165,184 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    background: var(--page-bg);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
   html {
     @apply font-sans;
   }
 }
 
+/* ==========================================================================
+   Piezas semánticas: los componentes usan ESTAS clases, no colores sueltos.
+   ========================================================================== */
+@layer components {
+  .display {
+    font-family: var(--font-display, var(--font-sans)), var(--font-sans), sans-serif;
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+  }
+
+  .surface {
+    background: var(--surface);
+    border: var(--border-w) solid var(--surface-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+  .surface-lift {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .surface-lift:hover {
+    transform: translate(var(--lift-x), var(--lift-y));
+    box-shadow: var(--shadow-lift);
+  }
+
+  .hero-card {
+    background: var(--hero-bg);
+    color: var(--hero-fg);
+    border: var(--border-w) solid var(--surface-border);
+    border-radius: var(--radius-hero);
+    box-shadow: var(--shadow-hero);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: var(--chip-border-w) solid var(--chip-border);
+  }
+
+  /* Etapas: poner data-stage="cold_lead" (etc.) en el elemento */
+  [data-stage="cold_lead"] { --stage-bg: var(--s-cold-bg); --stage-fg: var(--s-cold-fg); --stage-solid: var(--s-cold); }
+  [data-stage="contacted"] { --stage-bg: var(--s-contacted-bg); --stage-fg: var(--s-contacted-fg); --stage-solid: var(--s-contacted); }
+  [data-stage="meeting"] { --stage-bg: var(--s-meeting-bg); --stage-fg: var(--s-meeting-fg); --stage-solid: var(--s-meeting); }
+  [data-stage="negotiation"] { --stage-bg: var(--s-negotiation-bg); --stage-fg: var(--s-negotiation-fg); --stage-solid: var(--s-negotiation); }
+  [data-stage="won"] { --stage-bg: var(--s-won-bg); --stage-fg: var(--s-won-fg); --stage-solid: var(--s-won); }
+  [data-stage="lost"] { --stage-bg: var(--s-lost-bg); --stage-fg: var(--s-lost-fg); --stage-solid: var(--s-lost); }
+
+  .stage-chip { background: var(--stage-bg); color: var(--stage-fg); }
+  .stage-solid { background: var(--stage-solid); }
+  .stage-soft { background: var(--stage-bg); color: var(--stage-fg); }
+
+  /* Urgencia: poner data-urgency="overdue" (etc.) */
+  [data-urgency="overdue"] { --u-bg: var(--u-overdue-bg); --u-fg: var(--u-overdue-fg); }
+  [data-urgency="today"] { --u-bg: var(--u-today-bg); --u-fg: var(--u-today-fg); }
+  [data-urgency="tomorrow"] { --u-bg: var(--u-tomorrow-bg); --u-fg: var(--u-tomorrow-fg); }
+  [data-urgency="soon"] { --u-bg: var(--u-soon-bg); --u-fg: var(--u-soon-fg); }
+  [data-urgency="later"] { --u-bg: var(--u-later-bg); --u-fg: var(--u-later-fg); }
+  [data-urgency="none"] { --u-bg: var(--u-none-bg); --u-fg: var(--u-none-fg); }
+  .urgency-chip { background: var(--u-bg); color: var(--u-fg); }
+
+  /* Botón de grabar */
+  .rec-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: var(--rec-bg);
+    color: var(--rec-fg);
+    border: var(--rec-border);
+    box-shadow: var(--rec-shadow);
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+  .rec-btn:hover:not(:disabled) { filter: brightness(1.06); transform: scale(1.04); }
+  .rec-btn:active:not(:disabled) { transform: scale(0.96); }
+  .rec-btn:disabled { opacity: 0.6; cursor: wait; }
+  .rec-btn[data-recording="true"] {
+    background: var(--rec-active-bg);
+    color: var(--rec-active-fg);
+  }
+  .hero-card .rec-btn:not([data-recording="true"]) {
+    background: var(--rec-hero-bg);
+    color: var(--rec-hero-fg);
+  }
+  .rec-btn[data-recording="true"] { animation: record-pulse 1.4s ease-in-out infinite; }
+
+  /* Ecualizador mientras se graba */
+  .eq { display: inline-flex; align-items: center; gap: 3px; height: 28px; }
+  .eq > span {
+    width: 4px; height: 100%; border-radius: 4px; background: currentColor;
+    transform-origin: center; animation: eq-bounce 0.9s ease-in-out infinite;
+  }
+  .eq > span:nth-child(2) { animation-delay: -0.15s; }
+  .eq > span:nth-child(3) { animation-delay: -0.3s; }
+  .eq > span:nth-child(4) { animation-delay: -0.45s; }
+  .eq > span:nth-child(5) { animation-delay: -0.6s; }
+
+  /* Botón circular de "tarea hecha" */
+  .check-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.25rem; height: 2.25rem; flex-shrink: 0; border-radius: 9999px;
+    border: 2px solid var(--input); color: transparent; background: var(--surface);
+    transition: all 0.15s ease;
+  }
+  .check-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .check-btn[data-done="true"] { background: var(--s-won); border-color: var(--surface-border); color: var(--on-solid); }
+}
+
 @keyframes record-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgb(109 40 217 / 45%);
-  }
-  50% {
-    box-shadow: 0 0 0 14px rgb(109 40 217 / 0%);
-  }
+  0%, 100% { box-shadow: var(--rec-shadow), 0 0 0 0 var(--rec-ring); }
+  50% { box-shadow: var(--rec-shadow), 0 0 0 16px transparent; }
+}
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
 }
 
 .animate-record-pulse {
   animation: record-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rec-btn[data-recording="true"], .eq > span, .animate-record-pulse { animation: none; }
+}
+
+/* Columna del pipeline (desktop) */
+@layer components {
+  .column {
+    background: color-mix(in srgb, var(--stage-bg) 48%, transparent);
+    border: var(--border-w) solid var(--surface-border);
+    border-radius: var(--radius-card);
+  }
+}
+
+/* ==========================================================================
+   Detalles propios de "Calle": botones, campos y hoja con borde negro grueso
+   ========================================================================== */
+@layer components {
+  [data-slot="button"].bg-primary,
+  [data-slot="button"].border-border {
+    border: 2px solid #111111;
+    box-shadow: 3px 3px 0 #111111;
+    font-weight: 700;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  [data-slot="button"].bg-primary:hover,
+  [data-slot="button"].border-border:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 #111111;
+  }
+  [data-slot="button"].bg-primary:active,
+  [data-slot="button"].border-border:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #111111;
+  }
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"] {
+    border-width: 2px;
+    background: #ffffff;
+  }
+  [data-slot="sheet-content"] {
+    border-top: 3px solid #111111;
+  }
+  .check-btn { border-width: 2.5px; border-color: #111111; }
 }

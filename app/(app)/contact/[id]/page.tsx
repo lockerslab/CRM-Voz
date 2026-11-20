@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatStamp } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 import type { Contact, Interaction, Task } from "@/types";
-import { PIPELINE_STAGE_COLORS, PIPELINE_STAGE_LABELS } from "@/types";
+import { PIPELINE_STAGE_LABELS } from "@/types";
 import { MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -58,10 +58,12 @@ export default async function ContactPage({ params }: ContactPageProps) {
         .order("name", { ascending: true }),
     ]);
 
-  const stageColors = PIPELINE_STAGE_COLORS[typedContact.stage];
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-4 py-5 sm:px-6">
+    <main
+      data-stage={typedContact.stage}
+      className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 pt-5 pb-16 sm:px-6"
+    >
       <div className="flex items-center justify-between gap-3">
         <Button
           variant="ghost"
@@ -72,19 +74,20 @@ export default async function ContactPage({ params }: ContactPageProps) {
         >
           ← Pipeline
         </Button>
-        <Badge className={`border-0 ${stageColors.chip}`}>
+        <span className="chip stage-chip px-3 py-1 text-sm">
           {PIPELINE_STAGE_LABELS[typedContact.stage]}
-        </Badge>
+        </span>
       </div>
 
-      <header className="space-y-1 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+      <header className="surface relative space-y-1 overflow-hidden p-5">
+        <span className="stage-solid absolute inset-y-0 left-0 w-1.5" aria-hidden />
+        <h1 className="display pl-2 text-3xl text-foreground">
           {typedContact.name}
         </h1>
         {typedContact.company ? (
-          <p className="text-slate-500">{typedContact.company}</p>
+          <p className="pl-2 text-muted-foreground">{typedContact.company}</p>
         ) : null}
-        <div className="flex flex-wrap gap-2 pt-2 text-sm text-slate-500">
+        <div className="flex flex-wrap gap-2 pl-2 pt-2 text-sm text-muted-foreground">
           {typedContact.email ? <span>{typedContact.email}</span> : null}
           {typedContact.phone ? <span>{typedContact.phone}</span> : null}
           {typedContact.product_interest ? (
@@ -92,7 +95,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
           ) : null}
         </div>
         {typedContact.channels?.length ? (
-          <div className="flex flex-wrap gap-1 pt-1">
+          <div className="flex flex-wrap gap-1 pl-2 pt-1">
             {typedContact.channels.map((ch) => (
               <Badge key={ch} variant="outline" className="text-[10px]">
                 {ch}
@@ -103,12 +106,12 @@ export default async function ContactPage({ params }: ContactPageProps) {
       </header>
 
       {typedContact.notes ? (
-        <Card className="rounded-2xl border-slate-200 shadow-sm">
+        <Card className="surface ring-0">
           <CardHeader>
             <CardTitle className="text-base font-semibold">Notas</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap text-sm text-slate-600">
+            <p className="whitespace-pre-wrap text-sm text-muted-foreground">
               {typedContact.notes}
             </p>
           </CardContent>
@@ -116,45 +119,50 @@ export default async function ContactPage({ params }: ContactPageProps) {
       ) : null}
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold text-slate-800">
+        <h2 className="display text-lg text-foreground">
           Agregar nota de voz
         </h2>
         <VoiceRecorder contacts={(allContacts as Contact[]) ?? []} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold text-slate-800">Tareas</h2>
-        <TaskList tasks={(tasks as Task[]) ?? []} />
+        <h2 className="display text-lg text-foreground">Tareas</h2>
+        <TaskList
+          tasks={(tasks as Task[]) ?? []}
+          now={new Date()}
+          contactNames={{ [typedContact.id]: typedContact.name }}
+          emptyText="Sin tareas para esta persona."
+        />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold text-slate-800">Interacciones</h2>
+        <h2 className="display text-lg text-foreground">Interacciones</h2>
         <ul className="space-y-2">
           {((interactions as Interaction[]) ?? []).map((item) => (
             <li
               key={item.id}
-              className="rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm transition-all duration-200 hover:shadow-md"
+              className="surface p-4 text-sm"
             >
               <div className="mb-1 flex items-center justify-between gap-2">
                 <Badge variant="outline">{item.type}</Badge>
-                <time className="text-xs text-slate-400">
+                <time className="text-xs text-muted-foreground">
                   {formatStamp(item.created_at)}
                 </time>
               </div>
               {item.extracted_json?.summary ? (
-                <p className="mb-1 text-sm font-medium text-slate-800">
+                <p className="mb-1 text-sm font-semibold text-foreground">
                   {item.extracted_json.summary}
                 </p>
               ) : null}
-              <p className="whitespace-pre-wrap text-slate-500">
+              <p className="whitespace-pre-wrap text-muted-foreground">
                 {item.transcript ?? "Sin transcripción"}
               </p>
             </li>
           ))}
           {(interactions ?? []).length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-10 text-center">
-              <MessageSquare className="size-6 text-slate-300" />
-              <p className="text-sm text-slate-400">
+            <div className="surface flex flex-col items-center gap-2 px-4 py-10 text-center">
+              <MessageSquare className="size-6 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">
                 Todavía no hay interacciones.
               </p>
             </div>

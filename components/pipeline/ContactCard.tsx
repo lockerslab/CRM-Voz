@@ -9,14 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatDue } from "@/lib/dates";
+import { DEFAULT_TIMEZONE } from "@/lib/dates";
+import { getUrgency, urgencyLabel } from "@/lib/urgency";
 import { createClient } from "@/lib/supabase/client";
 import type { Contact, PipelineStage, Task } from "@/types";
-import {
-  PIPELINE_STAGES,
-  PIPELINE_STAGE_COLORS,
-  PIPELINE_STAGE_LABELS,
-} from "@/types";
+import { PIPELINE_STAGES, PIPELINE_STAGE_LABELS } from "@/types";
 import { CalendarClock, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -26,16 +23,27 @@ type ContactCardProps = {
   showStageMenu?: boolean;
   onStageChange?: (contactId: string, stage: PipelineStage) => void;
   nextTask?: Task | null;
+  now?: Date;
+  timezone?: string;
 };
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase();
+}
 
 export function ContactCard({
   contact,
   showStageMenu = false,
   onStageChange,
   nextTask = null,
+  now,
+  timezone = DEFAULT_TIMEZONE,
 }: ContactCardProps) {
   const [moving, setMoving] = useState(false);
-  const colors = PIPELINE_STAGE_COLORS[contact.stage];
+  const clock = now ?? new Date();
 
   async function moveToStage(stage: PipelineStage) {
     if (stage === contact.stage || moving) return;
@@ -52,43 +60,62 @@ export function ContactCard({
 
   return (
     <div
-      className={`relative rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${colors.border}`}
+      data-stage={contact.stage}
+      className="surface surface-lift relative"
     >
       <Link
         href={`/contact/${contact.id}`}
-        className="block p-4 pr-11 transition-all duration-200"
+        className="flex items-start gap-3 p-3.5"
       >
-        <p className="text-[15px] font-bold leading-tight text-slate-900">
-          {contact.name}
-        </p>
-        {contact.company ? (
-          <p className="mt-1 text-sm text-slate-500">{contact.company}</p>
-        ) : null}
-        {nextTask ? (
-          <div className="mt-3 flex items-start gap-1.5 text-xs text-slate-500">
-            <CalendarClock className="mt-0.5 size-3.5 shrink-0 text-violet-600" />
-            <span className="min-w-0">
-              <span className="font-medium text-slate-700">{nextTask.title}</span>
+        <span
+          className="stage-solid display flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-[color:var(--surface-border)] text-sm text-[color:var(--on-solid)]"
+          aria-hidden
+        >
+          {initialsOf(contact.name)}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="line-clamp-2 block pr-8 text-[15px] leading-tight font-bold text-foreground">
+            {contact.name}
+          </span>
+          {contact.company ? (
+            <span className="mt-0.5 block truncate pr-8 text-sm text-muted-foreground">
+              {contact.company}
+            </span>
+          ) : null}
+          {contact.product_interest ? (
+            <span className="chip stage-chip mt-1.5 max-w-full !rounded-lg !whitespace-normal leading-tight">{contact.product_interest}</span>
+          ) : null}
+          {nextTask ? (
+            <span
+              className="mt-2 block space-y-1"
+              data-urgency={getUrgency(nextTask.due_date, clock, timezone)}
+            >
+              <span className="flex items-start gap-1.5">
+                <CalendarClock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                <span className="line-clamp-2 min-w-0 text-xs font-medium text-foreground/80">
+                  {nextTask.title}
+                </span>
+              </span>
               {nextTask.due_date ? (
-                <span className="block text-slate-400">
-                  {formatDue(nextTask.due_date)}
+                <span className="chip urgency-chip max-w-full !rounded-lg !whitespace-normal leading-tight">
+                  {urgencyLabel(nextTask.due_date, clock, timezone, true)}
                 </span>
               ) : null}
             </span>
-          </div>
-        ) : null}
+          ) : null}
+        </span>
       </Link>
 
       {showStageMenu ? (
-        <div className="absolute top-2.5 right-2.5">
+        <div className="absolute top-2 right-1.5">
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
                 <Button
                   type="button"
-                  size="icon-sm"
+                  size="icon"
                   variant="ghost"
-                  className="text-slate-400 transition-all duration-200 hover:text-slate-700"
+                  className="size-10 text-muted-foreground transition-all duration-200 hover:text-foreground"
                   aria-label="Mover de etapa"
                   disabled={moving}
                 />
@@ -107,7 +134,8 @@ export function ContactCard({
                   className="transition-all duration-200"
                 >
                   <span
-                    className={`mr-2 inline-block size-2 rounded-full ${PIPELINE_STAGE_COLORS[stage].chip.split(" ")[0]}`}
+                    data-stage={stage}
+                    className="stage-solid mr-2 inline-block size-2.5 rounded-full"
                   />
                   {PIPELINE_STAGE_LABELS[stage]}
                 </DropdownMenuItem>

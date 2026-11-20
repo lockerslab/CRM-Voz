@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { Mic } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -53,11 +54,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
-      <Card className="w-full max-w-md rounded-2xl border-slate-200 bg-white shadow-sm transition-all duration-200">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-5 p-4">
+      <Link href="/" className="flex items-center gap-2.5">
+        <span className="hero-card flex size-11 items-center justify-center rounded-2xl">
+          <Mic className="size-5" />
+        </span>
+        <span className="display text-2xl text-foreground">crm-voz</span>
+      </Link>
+      <Card className="surface w-full max-w-md py-2 ring-0">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">
-            crm-voz
+          <CardTitle className="display text-2xl">
+            Creá tu cuenta
           </CardTitle>
           <CardDescription>Creá tu cuenta</CardDescription>
         </CardHeader>
@@ -70,7 +77,7 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="h-10 rounded-xl transition-all duration-200"
+                className="h-11 rounded-xl transition-all duration-200"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -83,29 +90,29 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                className="h-10 rounded-xl transition-all duration-200"
+                className="h-11 rounded-xl transition-all duration-200"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
             {message ? (
-              <p className="text-sm text-slate-500">{message}</p>
+              <p className="text-sm text-muted-foreground">{message}</p>
             ) : null}
           </CardContent>
           <CardFooter className="flex flex-col items-stretch gap-3 bg-transparent">
             <Button
               type="submit"
               disabled={loading}
-              className="h-11 rounded-xl bg-[#6D28D9] transition-all duration-200 hover:bg-[#5b21b6]"
+              className="h-12 rounded-xl text-base font-bold transition-all duration-200"
             >
               {loading ? "Creando…" : "Registrarme"}
             </Button>
-            <p className="text-center text-sm text-slate-500">
+            <p className="text-center text-sm text-muted-foreground">
               ¿Ya tenés cuenta?{" "}
               <Link
                 href="/login"
-                className="font-medium text-violet-700 underline-offset-4 transition-all duration-200 hover:underline"
+                className="font-semibold text-primary underline-offset-4 transition-all duration-200 hover:underline"
               >
                 Entrar
               </Link>

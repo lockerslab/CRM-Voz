@@ -208,7 +208,7 @@ export function NoteReviewSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
-        className="max-h-[92vh] overflow-y-auto rounded-t-2xl border-slate-200 bg-white sm:mx-auto sm:max-w-lg"
+        className="max-h-[92vh] overflow-y-auto rounded-t-3xl bg-card sm:mx-auto sm:max-w-lg"
       >
         <SheetHeader>
           <SheetTitle className="text-lg font-bold">Revisar nota de voz</SheetTitle>
@@ -384,7 +384,7 @@ export function NoteReviewSheet({
           </Button>
           <Button
             type="button"
-            className="rounded-xl bg-[#6D28D9] transition-all duration-200 hover:bg-[#5b21b6]"
+            className="h-12 rounded-xl text-base font-bold transition-all duration-200"
             onClick={() => void handleConfirm()}
             disabled={!canSave}
           >

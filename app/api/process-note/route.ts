@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     );
   }
 
+  const tDb = performance.now();
   const [{ data: profile }, { data: contacts }] = await Promise.all([
     supabase
       .from("profiles")
@@ -66,11 +67,14 @@ export async function POST(request: Request) {
       .order("updated_at", { ascending: false }),
   ]);
 
+  const dbMs = Math.round(performance.now() - tDb);
+
   const timezone =
     (profile as { timezone?: string } | null)?.timezone ??
     "America/Argentina/Buenos_Aires";
 
   try {
+    const tLlm = performance.now();
     const { proposal, stub } = await extractNoteData(transcript, {
       timezone,
       contacts: (contacts ?? []).map((c) => ({
@@ -79,6 +83,8 @@ export async function POST(request: Request) {
         company: (c.company as string | null) ?? null,
       })),
     });
+
+    const llmMs = Math.round(performance.now() - tLlm);
 
     // Con la clave de Groq configurada (no stub), una propuesta totalmente vacía
     // casi seguro viene de audio sin contenido real: no abrimos una pantalla vacía.
@@ -99,6 +105,7 @@ export async function POST(request: Request) {
       transcript,
       timezone,
       stub,
+      timing: { db_ms: dbMs, llm_ms: llmMs },
     };
 
     // Endpoint does NOT persist — only returns the proposal.
