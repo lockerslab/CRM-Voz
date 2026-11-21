@@ -1,7 +1,7 @@
 # Roles y empresas en crm-voz
 
 > **Estado:** borrador para revisar · 21 de noviembre de 2026
-> **Decisiones:** pendientes (ver la sección [Decisiones](#decisiones-que-necesito), donde se registra lo que se vaya resolviendo)
+> **Decisiones:** 3 de 8 resueltas (la 1, la 3 y la 4). Ver la sección [Decisiones](#decisiones-que-necesito), donde se registra lo que se vaya resolviendo.
 > **Alcance de este documento:** es una propuesta. No se hizo ningún cambio en la base de datos ni en el sitio publicado.
 > **Uso:** documento interno de trabajo. No forma parte de la app. Describe medidas de seguridad y riesgos, así que no corresponde publicarlo para clientes.
 
@@ -146,10 +146,10 @@ Cada una trae la recomendación y qué cambia si se elige otra cosa. La columna 
 
 | # | Pregunta | Recomendación | Alternativa | Resolución |
 |---|---|---|---|---|
-| 1 | ¿Una persona puede estar en más de una empresa? | No, al menos al principio. | Sí: hace falta un selector de empresa en toda la app y cambia la forma de proteger los datos. Se puede sumar después. | Pendiente |
+| 1 | ¿Una persona puede estar en más de una empresa? | No, al menos al principio. | Sí: hace falta un selector de empresa en toda la app y cambia la forma de proteger los datos. Se puede sumar después. | **Decidido (21 nov 2026):** no, una sola empresa por persona (versión 1). |
 | 2 | ¿Quién ve a quién? | Cada vendedor tiene un gerente, y el gerente ve a sus vendedores. | El gerente ve a todos: más simple, pero solo sirve para empresas chicas. | Pendiente |
-| 3 | ¿El gerente puede escuchar el audio? | No por defecto. Lee la transcripción y el administrador puede habilitar el audio. | Siempre sí: más fácil, pero los vendedores graban con más cuidado y la app pierde espontaneidad. | Pendiente |
-| 4 | ¿Los contactos son de la empresa o del vendedor? | De la empresa. Si alguien se va, se reasignan. En un espacio personal el dueño es el usuario. | Del vendedor: la empresa perdería clientes cada vez que alguien renuncia. | Pendiente |
+| 3 | ¿El gerente puede escuchar el audio? | No por defecto. Lee la transcripción y el administrador puede habilitar el audio. | Siempre sí: más fácil, pero los vendedores graban con más cuidado y la app pierde espontaneidad. | **Decidido (21 nov 2026):** no por defecto; el administrador puede habilitarlo y cada acceso queda registrado. |
+| 4 | ¿Los contactos son de la empresa o del vendedor? | De la empresa. Si alguien se va, se reasignan. En un espacio personal el dueño es el usuario. | Del vendedor: la empresa perdería clientes cada vez que alguien renuncia. | **Decidido (21 nov 2026):** de la empresa; si alguien se va, sus contactos se reasignan. |
 | 5 | ¿Cómo se invita a la gente? | Con un link para copiar y mandar por WhatsApp. Email automático, más adelante. | Email automático desde el día uno: requiere un servicio de envío de correo y suma una semana. | Pendiente |
 | 6 | ¿Qué pasa con un freelancer que pasa a una empresa? | Mantiene su espacio personal y puede llevar contactos a la empresa con un botón, solo si quiere. Nada se mueve solo. | Migración automática de todo: riesgo de que alguien se lleve o pierda clientes sin darse cuenta. | Pendiente |
 | 7 | ¿Cómo se cobra? | Por usuario por mes. Se decide antes de la etapa 5. | Precio fijo por empresa, o por cantidad de notas de voz (refleja mejor el costo real de transcripción e IA). | Pendiente |
