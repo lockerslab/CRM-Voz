@@ -1,7 +1,7 @@
 # Roles y empresas en crm-voz
 
 > **Estado:** borrador para revisar · 21 de noviembre de 2026
-> **Decisiones:** 3 de 8 resueltas (la 1, la 3 y la 4). Ver la sección [Decisiones](#decisiones-que-necesito), donde se registra lo que se vaya resolviendo.
+> **Decisiones:** 4 de 8 resueltas (la 1, la 2, la 3 y la 4). Ver la sección [Decisiones](#decisiones-que-necesito), donde se registra lo que se vaya resolviendo.
 > **Alcance de este documento:** es una propuesta. No se hizo ningún cambio en la base de datos ni en el sitio publicado.
 > **Uso:** documento interno de trabajo. No forma parte de la app. Describe medidas de seguridad y riesgos, así que no corresponde publicarlo para clientes.
 
@@ -122,7 +122,7 @@ Cada etapa se apoya en la anterior. Tamaño: **S** una sesión de trabajo, **M**
 
 | Etapa | Qué se entrega | Tamaño | Riesgo |
 |---|---|---|---|
-| **1. Cimientos invisibles** | Empresas y miembros; cada usuario actual recibe su empresa personal; reglas de acceso nuevas; matriz completa de pruebas de espionaje. No se nota ningún cambio. | M | Alto (toca seguridad y datos reales) |
+| **1. Cimientos invisibles** | Empresas y miembros; cada usuario actual recibe su empresa personal; reglas de acceso nuevas; matriz completa de pruebas de espionaje. No se nota ningún cambio. **Estado: escrita y probada en una base local (148 pruebas). Pendiente de aplicar en Supabase.** Ver [guía de aplicación](etapa-1-guia-de-aplicacion.md). | M | Alto (toca seguridad y datos reales) |
 | **2. Equipo e invitaciones** | Pantalla "Equipo" para el administrador; invitar por link, cambiar roles, desactivar personas. | M | Medio |
 | **3. Vista de gerente** | Selector de equipo y vendedor, reasignación de contactos, resumen del equipo. Congelar el alcance antes de empezar. | M a L | Medio |
 | **4. Ajustes de la empresa** | Diseño por defecto, logo y color de marca, interruptores de privacidad, aviso de consentimiento. | M | Bajo |
@@ -146,8 +146,8 @@ Cada una trae la recomendación y qué cambia si se elige otra cosa. La columna 
 
 | # | Pregunta | Recomendación | Alternativa | Resolución |
 |---|---|---|---|---|
-| 1 | ¿Una persona puede estar en más de una empresa? | No, al menos al principio. | Sí: hace falta un selector de empresa en toda la app y cambia la forma de proteger los datos. Se puede sumar después. | **Decidido (21 nov 2026):** no, una sola empresa por persona (versión 1). |
-| 2 | ¿Quién ve a quién? | Cada vendedor tiene un gerente, y el gerente ve a sus vendedores. | El gerente ve a todos: más simple, pero solo sirve para empresas chicas. | Pendiente |
+| 1 | ¿Una persona puede estar en más de una empresa? | No, al menos al principio. | Sí: hace falta un selector de empresa en toda la app y cambia la forma de proteger los datos. Se puede sumar después. | **Decidido (21 nov 2026):** no, una sola empresa por persona (versión 1). Además de su empresa, cada persona conserva su espacio personal (ver decisión 6). |
+| 2 | ¿Quién ve a quién? | Cada vendedor tiene un gerente, y el gerente ve a sus vendedores. | El gerente ve a todos: más simple, pero solo sirve para empresas chicas. | **Decidido (21 nov 2026):** cada vendedor tiene un gerente, y el gerente ve a sus vendedores. |
 | 3 | ¿El gerente puede escuchar el audio? | No por defecto. Lee la transcripción y el administrador puede habilitar el audio. | Siempre sí: más fácil, pero los vendedores graban con más cuidado y la app pierde espontaneidad. | **Decidido (21 nov 2026):** no por defecto; el administrador puede habilitarlo y cada acceso queda registrado. |
 | 4 | ¿Los contactos son de la empresa o del vendedor? | De la empresa. Si alguien se va, se reasignan. En un espacio personal el dueño es el usuario. | Del vendedor: la empresa perdería clientes cada vez que alguien renuncia. | **Decidido (21 nov 2026):** de la empresa; si alguien se va, sus contactos se reasignan. |
 | 5 | ¿Cómo se invita a la gente? | Con un link para copiar y mandar por WhatsApp. Email automático, más adelante. | Email automático desde el día uno: requiere un servicio de envío de correo y suma una semana. | Pendiente |
@@ -171,7 +171,8 @@ organizations
 memberships
   org_id, user_id, role (owner | admin | manager | seller),
   manager_id (a quién reporta), status (active | disabled)
-  -- v1: un usuario, una empresa (user_id único)
+  -- v1: cada persona tiene UN espacio personal y, como máximo, UNA empresa
+  -- (índices únicos parciales sobre is_personal)
 
 invitations
   id, org_id, role, manager_id, token_hash, invited_by,
